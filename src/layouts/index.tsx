@@ -21,7 +21,7 @@ const MainLayout: React.FC<Props> = ({ title, description, children }) => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <AppShell
-        padding="md"
+        padding={0}
         navbar={<Nav />}
         header={<Header />}
         styles={(theme) => ({
@@ -30,6 +30,7 @@ const MainLayout: React.FC<Props> = ({ title, description, children }) => {
               theme.colorScheme === "dark"
                 ? theme.colors.dark[8]
                 : theme.colors.gray[0],
+            overflowX: "hidden",
           },
         })}
       >

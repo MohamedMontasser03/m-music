@@ -1,5 +1,6 @@
 import { Card, Image, Stack, Text } from "@mantine/core";
 import React from "react";
+import { useDispatch } from "react-redux";
 
 type Props = {
   title: string;
@@ -12,6 +13,7 @@ type Props = {
 };
 
 export const Tile: React.FC<Props> = ({ title, thumbnails, authorName }) => {
+  const dispatch = useDispatch();
   const thumb = thumbnails.sort((a, b) => a.width - b.width)[0];
   const improvedImage = (imageUrl = "") => {
     if (imageUrl.includes("lh3.googleusercontent.com")) {

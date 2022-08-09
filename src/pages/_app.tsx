@@ -6,6 +6,8 @@ import superjson from "superjson";
 import { SessionProvider } from "next-auth/react";
 import "../styles/globals.css";
 import { MantineProvider } from "@mantine/core";
+import { Provider } from "react-redux";
+import { store } from "../app/store";
 
 const MyApp: AppType = ({
   Component,
@@ -17,11 +19,12 @@ const MyApp: AppType = ({
         withGlobalStyles
         withNormalizeCSS
         theme={{
-          /** Put your mantine theme override here */
           colorScheme: "dark",
         }}
       >
-        <Component {...pageProps} />
+        <Provider store={store}>
+          <Component {...pageProps} />
+        </Provider>
       </MantineProvider>
     </SessionProvider>
   );

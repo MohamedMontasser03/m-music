@@ -2,6 +2,7 @@ import { AppShell, Navbar, Text } from "@mantine/core";
 import Head from "next/head";
 import { Header } from "../components/header/Header";
 import { Nav } from "../components/navbar/Nav";
+import { TrackPlayer } from "../components/track-player/TrackPlayer";
 
 type Props = {
   title: string;
@@ -35,6 +36,7 @@ const MainLayout: React.FC<Props> = ({ title, description, children }) => {
         })}
       >
         {children}
+        <TrackPlayer />
       </AppShell>
     </>
   );

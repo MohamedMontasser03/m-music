@@ -29,15 +29,11 @@ const Home: NextPage = () => {
 
   useEffect(() => {
     if (entry?.isIntersecting && data?.key?.continuation && !isLoading) {
-      console.log("Hi");
       continuationData.current.continuation = data.key.continuation;
       continuationData.current.trackingParam = data.key.trackingParam;
-      refetch()
-        .then(() => {
-          console.log("Hio", data);
-        })
-        .catch(console.error);
+      refetch();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [entry]);
 
   return (

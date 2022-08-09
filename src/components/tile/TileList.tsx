@@ -13,8 +13,8 @@ export const TileList: React.FC<Props> = ({ section }) => {
     <Group align="center" mt="xl">
       <Title pl="md">{section.title}</Title>
       <Carousel slideSize="25%" loop slideGap="md">
-        {section.items.map((item) => (
-          <Carousel.Slide key={item.id}>
+        {section.items.map((item, idx) => (
+          <Carousel.Slide key={item.id + idx}>
             <Tile {...item} />
           </Carousel.Slide>
         ))}

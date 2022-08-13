@@ -4,12 +4,15 @@ import {
   Dialog,
   Group,
   Image,
+  ScrollArea,
   Slider,
   Stack,
   Text,
   UnstyledButton,
 } from "@mantine/core";
-import React from "react";
+import React, { DragEvent } from "react";
+import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
+import { useQuery } from "react-query";
 import { useDispatch, useSelector } from "react-redux";
 import {
   PlayerPause,
@@ -22,11 +25,14 @@ import {
   Volume3,
 } from "tabler-icons-react";
 import { StoreType } from "../../app/store";
+import { trpc } from "../../utils/trpc";
 import {
   pause,
   play,
+  playPlaylist,
   queNext,
   quePrev,
+  reorder,
   seek,
   setVolume,
   toggle,
@@ -52,7 +58,7 @@ export const TrackPlayer: React.FC = () => {
   return (
     <>
       <Dialog opened={queue.length > 0} size="xl" radius="md">
-        <Group>
+        <Group noWrap>
           <Image
             src={queue[idx]?.thumbnails[0]?.url}
             width={150}
@@ -64,9 +70,9 @@ export const TrackPlayer: React.FC = () => {
               flexGrow: 1,
             }}
             justify="center"
-            align="center"
+            align="flex-start"
           >
-            <Text>{queue[idx]?.title}</Text>
+            <Text lineClamp={1}>{queue[idx]?.title}</Text>
             <Group
               sx={{
                 width: "100%",
@@ -76,14 +82,14 @@ export const TrackPlayer: React.FC = () => {
               <Slider
                 label={(v) => formatTime(v)}
                 value={Math.floor(progress)}
-                max={queue[idx]?.length}
+                max={queue[idx]?.duration}
                 onChange={(v) => dispatch(seek(v))}
                 onChangeEnd={() => dispatch(play())}
                 sx={{
                   flexGrow: 1,
                 }}
               />
-              <Text>{formatTime(queue[idx]?.length || 0)}</Text>
+              <Text>{formatTime(queue[idx]?.duration || 0)}</Text>
             </Group>
             <Group
               position="apart"
@@ -164,31 +170,68 @@ export const TrackPlayer: React.FC = () => {
           bottom: 100,
         }}
       >
-        <Stack>
-          {queue.map((track, i) => (
-            <Button
-              key={track.title}
-              onClick={() => dispatch(play(i))}
-              variant={idx !== i ? "subtle" : "light"}
-              styles={{
-                inner: {
-                  justifyContent: "flex-start",
-                },
-              }}
-              p={4}
-            >
-              <Group>
-                <Image
-                  src={track.thumbnails[0]?.url}
-                  width={40}
-                  height={40}
-                  alt={track.title}
-                />
-                <Text>{track.title}</Text>
-              </Group>
-            </Button>
-          ))}
-        </Stack>
+        <DragDropContext
+          onDragEnd={(result) => {
+            if (!result.destination) return;
+            dispatch(
+              reorder({
+                from: result.source.index,
+                to: result.destination.index,
+              })
+            );
+          }}
+        >
+          <Droppable droppableId="queue">
+            {(provided) => (
+              <ScrollArea
+                style={{
+                  height: "10rem",
+                  overflowY: "auto",
+                }}
+              >
+                <Stack {...provided.droppableProps} ref={provided.innerRef}>
+                  {queue.map((track, i) => (
+                    <Draggable
+                      key={track.title}
+                      draggableId={track.title}
+                      index={i}
+                    >
+                      {(provided) => (
+                        <div
+                          onClick={() => dispatch(play(i))}
+                          {...provided.dragHandleProps}
+                          {...provided.draggableProps}
+                          ref={provided.innerRef}
+                          style={{
+                            ...provided.draggableProps.style,
+                          }}
+                        >
+                          <Group
+                            noWrap
+                            p={4}
+                            sx={{
+                              backgroundColor: i === idx ? "#0066FF55" : "",
+                              borderRadius: 4,
+                            }}
+                          >
+                            <Image
+                              src={track.thumbnails[0]?.url}
+                              width={40}
+                              height={40}
+                              alt={track.title}
+                            />
+                            <Text lineClamp={2}>{track.title}</Text>
+                          </Group>
+                        </div>
+                      )}
+                    </Draggable>
+                  ))}
+                  {provided.placeholder}
+                </Stack>
+              </ScrollArea>
+            )}
+          </Droppable>
+        </DragDropContext>
       </Dialog>
     </>
   );

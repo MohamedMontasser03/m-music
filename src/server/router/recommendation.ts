@@ -2,7 +2,7 @@ import { createRouter } from "./context";
 import { z } from "zod";
 import { getInitialRecommendation } from "../services/recommendation";
 
-export const exampleRouter = createRouter().query("", {
+export const recommendationRouter = createRouter().query("", {
   input: z
     .object({
       continuation: z.string().nullish(),

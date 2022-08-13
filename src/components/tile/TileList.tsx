@@ -15,7 +15,7 @@ export const TileList: React.FC<Props> = ({ section }) => {
       <Carousel slideSize="25%" loop slideGap="md">
         {section.items.map((item, idx) => (
           <Carousel.Slide key={item.id + idx}>
-            <Tile {...item} />
+            <Tile {...item} type={section.type} />
           </Carousel.Slide>
         ))}
       </Carousel>

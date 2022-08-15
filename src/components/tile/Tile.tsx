@@ -34,7 +34,7 @@ export const Tile: React.FC<Props> = ({
   const thumb = thumbnails.sort((a, b) => a.width - b.width)[0];
   const improvedImage = (imageUrl = "") => {
     if (imageUrl.includes("lh3.googleusercontent.com")) {
-      return imageUrl.replace("w60", "w180").replace("h60", "h180");
+      return imageUrl.replace("w60", "w544").replace("h60", "h544");
     }
 
     return imageUrl;

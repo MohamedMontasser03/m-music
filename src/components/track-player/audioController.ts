@@ -12,7 +12,6 @@ export const audioController = (() => {
   });
   el.addEventListener("pause", () => {
     store.dispatch(pause());
-    console.log("pause");
   });
   el.addEventListener("ended", () => {
     store.dispatch(playNext());

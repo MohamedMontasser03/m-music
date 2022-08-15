@@ -24,6 +24,7 @@ import {
   Volume2,
   Volume3,
 } from "tabler-icons-react";
+import { promise } from "zod";
 import { StoreType } from "../../app/store";
 import { trpc } from "../../utils/trpc";
 import {
@@ -52,13 +53,15 @@ export const TrackPlayer: React.FC = () => {
     const seconds = Math.floor(time % 60);
     return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
   };
-
   return (
     <>
       <Dialog opened={queue.length > 0} size="xl" radius="md">
         <Group noWrap>
           <Image
-            src={queue[idx]?.thumbnails[0]?.url}
+            src={
+              [...queue[idx]?.thumbnails!].sort((a, b) => b.width - a.width)[0]
+                ?.url
+            }
             width={150}
             height={150}
             alt={queue[idx]?.title}
@@ -81,8 +84,14 @@ export const TrackPlayer: React.FC = () => {
                 label={(v) => formatTime(v)}
                 value={Math.floor(progress)}
                 max={queue[idx]?.duration}
-                onChange={(v) => dispatch(setProgress(v))}
-                onChangeEnd={() => dispatch(play())}
+                onChange={(value) => {
+                  dispatch(setProgress({ value }));
+                  console.log("not end");
+                }}
+                onChangeEnd={(value) => {
+                  dispatch(setProgress({ value, end: true }));
+                  console.log("end");
+                }}
                 sx={{
                   flexGrow: 1,
                 }}

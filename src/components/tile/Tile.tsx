@@ -9,7 +9,7 @@ import {
 import React from "react";
 import { useDispatch } from "react-redux";
 import { trpc } from "../../utils/trpc";
-import { playPlaylist, push } from "../track-player/playerSlice";
+import { pushTrack } from "../track-player/playerSlice";
 
 type Props = {
   type: "playlist" | "track";
@@ -58,7 +58,7 @@ export const Tile: React.FC<Props> = ({
           const vid = res.data;
           type !== "playlist" &&
             dispatch(
-              push({
+              pushTrack({
                 id: vid?.id!,
                 title: vid?.title!,
                 authorName: vid?.author!,

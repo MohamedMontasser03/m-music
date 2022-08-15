@@ -26,12 +26,24 @@ export const playerSlice = createSlice({
   },
   reducers: {
     pause(state) {
-      audioController?.pause();
+      if (!audioController || !state.isPlaying) return;
+      const isPlaying =
+        audioController?.currentTime > 0 &&
+        !audioController?.paused &&
+        !audioController?.ended &&
+        audioController?.readyState > audioController?.HAVE_CURRENT_DATA;
+      if (!isPlaying) return;
+
       state.isPlaying = false;
-      console.log("paused");
+      audioController?.pause();
     },
     play(state, action: PayloadAction<number | undefined>) {
       if (!audioController) return;
+      if (
+        state.isPlaying &&
+        (action.payload === undefined || state.currentTrack === action.payload)
+      )
+        return;
       if (
         Number.isInteger(action?.payload) &&
         action?.payload! >= 0 &&
@@ -41,85 +53,70 @@ export const playerSlice = createSlice({
       if (audioController.src !== state?.queue[state?.currentTrack || 0]?.url) {
         audioController.src = state?.queue[state?.currentTrack || 0]?.url || "";
       }
-      audioController?.play();
       state.isPlaying = true;
-    },
-    toggle(state) {
-      if (!audioController) return;
-      if (state.isPlaying) {
-        audioController?.pause();
-      } else {
-        if (
-          audioController.src !== state?.queue[state?.currentTrack || 0]?.url
-        ) {
-          audioController.src =
-            state?.queue[state?.currentTrack || 0]?.url || "";
-        }
-        audioController.play();
-      }
-      state.isPlaying = !state.isPlaying;
+      audioController?.play();
     },
     syncProgress(state) {
       if (!audioController) return;
       state.progress = audioController.currentTime;
     },
-    queNext(state) {
-      if (!audioController) return;
-      if (state.currentTrack === state.queue.length - 1) {
-        audioController?.pause();
-        state.isPlaying = false;
-        return;
-      }
-
-      state.currentTrack = (state.currentTrack + 1) % state.queue.length;
-      audioController.src = state.queue[state.currentTrack]?.url || "";
-      audioController.play();
-    },
-    quePrev(state) {
-      if (!audioController) return;
-      if (state.currentTrack === 0) {
-        audioController?.pause();
-        state.isPlaying = false;
-        return;
-      }
-      state.currentTrack = state.currentTrack - 1;
-      audioController.src = state.queue[state.currentTrack]?.url || "";
-      audioController.play();
-    },
-    seek(state, action: PayloadAction<number>) {
+    setProgress(state, action: PayloadAction<number>) {
       if (!audioController) return;
       if (action.payload > audioController.duration || action.payload < 0)
         return;
       if (state.isPlaying) {
-        audioController?.pause();
         state.isPlaying = false;
+        audioController?.pause();
       }
 
       audioController.currentTime = action.payload;
       state.progress = action.payload;
     },
+    playNext(state) {
+      if (!audioController) return;
+      if (state.currentTrack === state.queue.length - 1) {
+        playerSlice.caseReducers.pause(state);
+        state.progress =
+          state.queue[state.currentTrack]?.duration ?? state.progress;
+        return;
+      }
+
+      playerSlice.caseReducers.play(state, {
+        payload: state.currentTrack + 1,
+        type: "PLAY",
+      });
+    },
+    playPrev(state) {
+      if (!audioController) return;
+      const timeBeforeReset = 10;
+      if (state.currentTrack === 0 || state.progress > timeBeforeReset) {
+        state.progress = 0;
+        audioController.currentTime = 0;
+        playerSlice.caseReducers.play(state, {
+          payload: state.currentTrack,
+          type: "PLAY",
+        });
+        return;
+      }
+      playerSlice.caseReducers.play(state, {
+        payload: state.currentTrack - 1,
+        type: "PLAY",
+      });
+    },
     setVolume(state, action: PayloadAction<number>) {
       if (!audioController) return;
       if (action.payload > 1 || action.payload < 0) return;
-      audioController.volume = action.payload;
       state.volume = action.payload;
+      audioController.volume = action.payload;
     },
-    playPlaylist(state, action: PayloadAction<TrackType[]>) {
-      if (!audioController) return;
-      state.queue = action.payload;
-      state.currentTrack = 0;
-      audioController.src = state.queue[state.currentTrack]?.url || "";
-      audioController.play();
-      state.isPlaying = true;
-    },
-    push(state, action: PayloadAction<TrackType>) {
+    pushTrack(state, action: PayloadAction<TrackType>) {
       if (!audioController) return;
       if (state.queue.some((t) => t.id === action.payload.id)) return;
       state.queue = [...state.queue, action.payload];
-      state.currentTrack = state.queue.length - 1;
-      audioController.src = state.queue[state.currentTrack]?.url || "";
-      audioController.play();
-      state.isPlaying = true;
+      playerSlice.caseReducers.play(state, {
+        payload: state.queue.length - 1,
+        type: "PLAY",
+      });
     },
     reorder(
       state,
@@ -142,7 +139,7 @@ export const playerSlice = createSlice({
       const [removed] = newQueue.splice(from, 1);
       newQueue.splice(to, 0, removed!);
       state.queue = newQueue;
-      // update currentTrack if it's in the new queue
+      // update currentTrack if it's in the queue
       if (state.currentTrack === from) {
         state.currentTrack = to;
       } else if (from < state.currentTrack && state.currentTrack <= to)
@@ -155,15 +152,13 @@ export const playerSlice = createSlice({
 
 export const {
   pause,
-  toggle,
   syncProgress,
-  queNext,
+  playNext,
   play,
-  seek,
+  setProgress,
   setVolume,
-  quePrev,
-  playPlaylist,
-  push,
+  playPrev,
+  pushTrack,
   reorder,
 } = playerSlice.actions;
 

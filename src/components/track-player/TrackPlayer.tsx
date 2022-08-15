@@ -29,13 +29,11 @@ import { trpc } from "../../utils/trpc";
 import {
   pause,
   play,
-  playPlaylist,
-  queNext,
-  quePrev,
+  playNext,
+  playPrev,
   reorder,
-  seek,
+  setProgress,
   setVolume,
-  toggle,
 } from "./playerSlice";
 
 export const TrackPlayer: React.FC = () => {
@@ -83,7 +81,7 @@ export const TrackPlayer: React.FC = () => {
                 label={(v) => formatTime(v)}
                 value={Math.floor(progress)}
                 max={queue[idx]?.duration}
-                onChange={(v) => dispatch(seek(v))}
+                onChange={(v) => dispatch(setProgress(v))}
                 onChangeEnd={() => dispatch(play())}
                 sx={{
                   flexGrow: 1,
@@ -125,17 +123,16 @@ export const TrackPlayer: React.FC = () => {
               </Group>
               <Group>
                 <ActionIcon
-                  disabled={idx <= 0}
                   variant="outline"
                   radius="xl"
-                  onClick={() => dispatch(quePrev())}
+                  onClick={() => dispatch(playPrev())}
                 >
                   <PlayerTrackPrev size={15} />
                 </ActionIcon>
                 <ActionIcon
                   variant="outline"
                   radius="xl"
-                  onClick={() => dispatch(toggle())}
+                  onClick={() => dispatch(isPlaying ? pause() : play())}
                 >
                   {isPlaying ? (
                     <PlayerPause size={15} />
@@ -147,7 +144,7 @@ export const TrackPlayer: React.FC = () => {
                   disabled={idx === queue.length - 1}
                   variant="outline"
                   radius="xl"
-                  onClick={() => dispatch(queNext())}
+                  onClick={() => dispatch(playNext())}
                 >
                   <PlayerTrackNext size={15} />
                 </ActionIcon>

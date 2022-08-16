@@ -5,7 +5,7 @@ import { RecommendationReturnType } from "../../utils/yt";
 import { Tile } from "./Tile";
 
 type Props = {
-  section: RecommendationReturnType["sections"][0];
+  section: RecommendationReturnType["sections"][number];
 };
 
 export const TileList: React.FC<Props> = ({ section }) => {
@@ -15,7 +15,7 @@ export const TileList: React.FC<Props> = ({ section }) => {
       <Carousel slideSize="25%" loop slideGap="md">
         {section.items.map((item, idx) => (
           <Carousel.Slide key={item.id + idx}>
-            <Tile {...item} type={section.type} />
+            <Tile {...item} />
           </Carousel.Slide>
         ))}
       </Carousel>

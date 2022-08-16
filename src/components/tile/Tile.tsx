@@ -1,4 +1,5 @@
 import {
+  ActionIcon,
   Button,
   Card,
   Image,
@@ -6,10 +7,11 @@ import {
   Text,
   UnstyledButton,
 } from "@mantine/core";
-import React from "react";
+import React, { useCallback, useMemo } from "react";
 import { useDispatch } from "react-redux";
 import { trpc } from "../../utils/trpc";
 import { pushTrack } from "../../app/track-player/playerSlice";
+import { PlayerPlay } from "tabler-icons-react";
 
 type Props = {
   type: "playlist" | "track";
@@ -31,14 +33,18 @@ export const Tile: React.FC<Props> = ({
   authorName,
 }) => {
   const dispatch = useDispatch();
-  const thumb = thumbnails.sort((a, b) => a.width - b.width)[0];
-  const improvedImage = (imageUrl = "") => {
+  const thumb = useMemo(
+    () => thumbnails.sort((a, b) => a.width - b.width)[0],
+    [thumbnails]
+  );
+  const improvedImage = useCallback((imageUrl = "") => {
     if (imageUrl.includes("lh3.googleusercontent.com")) {
       return imageUrl.replace("w60", "w544").replace("h60", "h544");
     }
 
     return imageUrl;
-  };
+  }, []);
+
   const { refetch } = trpc.useQuery(
     [
       "details.video",
@@ -51,49 +57,59 @@ export const Tile: React.FC<Props> = ({
       enabled: false,
     }
   );
+
   return (
-    <UnstyledButton
-      onClick={() => {
-        refetch().then((res) => {
-          const vid = res.data;
-          type !== "playlist" &&
-            dispatch(
-              pushTrack({
-                id: vid?.id!,
-                title: vid?.title!,
-                authorName: vid?.author!,
-                authorId: vid?.authorId!,
-                duration: +vid?.duration!,
-                thumbnails: vid?.thumbnails!,
-                url: vid?.audioFormats[0]?.url!,
-              })
-            );
-        });
+    <Card
+      withBorder
+      sx={{
+        maxWidth: 250,
+        height: 250 + 150,
       }}
-      disabled={type === "playlist"}
     >
-      <Card
-        withBorder
-        sx={{
-          maxWidth: 250,
-          height: 250 + 150,
-        }}
-      >
-        <Card.Section>
-          <Image
-            src={improvedImage(thumb?.url)}
-            height={250}
-            width={250}
-            alt={title}
-          />
-        </Card.Section>
-        <Stack spacing="xs" py="lg">
-          <Text lineClamp={2}>{title}</Text>
-          <Text color="dimmed" lineClamp={3}>
-            {authorName}
-          </Text>
-        </Stack>
-      </Card>
-    </UnstyledButton>
+      <Card.Section sx={{ position: "relative" }}>
+        <Image
+          src={improvedImage(thumb?.url)}
+          height={250}
+          width={250}
+          alt={title}
+        />
+        <ActionIcon
+          variant="filled"
+          color="red"
+          radius="xl"
+          p={4}
+          onClick={() =>
+            refetch().then((res) => {
+              const vid = res.data;
+              dispatch(
+                pushTrack({
+                  id: vid?.id!,
+                  title: vid?.title!,
+                  authorName: vid?.author!,
+                  authorId: vid?.authorId!,
+                  duration: +vid?.duration!,
+                  thumbnails: vid?.thumbnails!,
+                  url: vid?.audioFormats[0]?.url!,
+                })
+              );
+            })
+          }
+          disabled={type === "playlist"}
+          sx={{
+            position: "absolute",
+            bottom: 10,
+            right: 10,
+          }}
+        >
+          <PlayerPlay size={35} />
+        </ActionIcon>
+      </Card.Section>
+      <Stack spacing="xs" py="lg">
+        <Text lineClamp={2}>{title}</Text>
+        <Text color="dimmed" lineClamp={3}>
+          {authorName}
+        </Text>
+      </Stack>
+    </Card>
   );
 };

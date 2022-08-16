@@ -8,7 +8,7 @@ import {
   Stack,
   Text,
 } from "@mantine/core";
-import React from "react";
+import React, { useCallback } from "react";
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -43,7 +43,7 @@ export const TrackPlayer: React.FC = () => {
   const dispatch = useDispatch();
   const [isPlaylistOpen, setPlaylistOpen] = React.useState(false);
 
-  const formatTime = (time: number, max?: number) => {
+  const formatTime = useCallback((time: number, max?: number) => {
     const includeHours = (max ?? 0) / 3600 > 1 || (time ?? 0) / 3600 > 1;
     const hours = Math.floor(time / 3600);
     const minutes = Math.floor(time / 60) % 60;
@@ -51,7 +51,8 @@ export const TrackPlayer: React.FC = () => {
     return `${
       includeHours ? `${hours}:${minutes < 10 ? "0" : ""}` : ""
     }${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
-  };
+  }, []);
+
   return (
     <>
       <Dialog opened={queue.length > 0} size="xl" radius="md">
@@ -84,14 +85,10 @@ export const TrackPlayer: React.FC = () => {
                 label={(v) => formatTime(v)}
                 value={Math.floor(progress)}
                 max={queue[idx]?.duration}
-                onChange={(value) => {
-                  dispatch(setProgress({ value }));
-                  console.log("not end");
-                }}
-                onChangeEnd={(value) => {
-                  dispatch(setProgress({ value, end: true }));
-                  console.log("end");
-                }}
+                onChange={(value) => dispatch(setProgress({ value }))}
+                onChangeEnd={(value) =>
+                  dispatch(setProgress({ value, play: true }))
+                }
                 sx={{
                   flexGrow: 1,
                 }}

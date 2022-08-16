@@ -37,7 +37,7 @@ const Home: NextPage = () => {
   }, [entry]);
 
   return (
-    <MainLayout title="Home">
+    <MainLayout title="Home" activePage="home">
       <Text weight="700" size={50} align="center">
         Hello There, <br /> How are you doing?
         <br />

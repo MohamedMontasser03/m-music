@@ -62,7 +62,7 @@ export const playerSlice = createSlice({
     },
     setProgress(
       state,
-      action: PayloadAction<{ value: number; end?: boolean }>
+      action: PayloadAction<{ value: number; play?: boolean }>
     ) {
       if (!audioController) return;
       if (
@@ -70,16 +70,18 @@ export const playerSlice = createSlice({
         action.payload.value < 0
       )
         return;
-      if (state.isPlaying && !action.payload.end) {
+      if (state.isPlaying && !action.payload.play) {
         state.isPlaying = false;
         audioController?.pause();
-      } else if (!state.isPlaying && action.payload.end) {
-        state.isPlaying = true;
-        audioController?.play();
       }
 
       audioController.currentTime = action.payload.value;
       state.progress = action.payload.value;
+
+      if (!state.isPlaying && action.payload.play) {
+        state.isPlaying = true;
+        audioController?.play();
+      }
     },
     playNext(state) {
       if (!audioController) return;

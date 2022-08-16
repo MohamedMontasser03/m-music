@@ -39,15 +39,15 @@ export const ytHeaders = {
   "x-goog-visitor-id": "CgtlbFJPa01NaHNXVSjg266XBg%3D%3D",
   "x-youtube-client-name": "67",
   "x-youtube-client-version": "1.20220801.01.00",
-};
+} as const;
 
 export type RecommendationReturnType = {
   continuation?: string;
   trackingParam?: string;
   sections: {
-    type: "track" | "playlist";
     title: string;
     items: {
+      type: "track" | "playlist";
       title: string;
       id: string;
       authorName: string;
@@ -119,11 +119,12 @@ function formatMusicList(musicList: any) {
     return musicList.map((track: any) => ({
       type: isTrack ? "track" : "playlist",
       title: track.musicTwoRowItemRenderer.title.runs[0].text,
-      id:
-        track.musicTwoRowItemRenderer.navigationEndpoint?.browseEndpoint?.browseId
-          .split("")
-          .slice(isTrack ? 0 : 2)
-          .join("") || "",
+      id: isTrack
+        ? track.musicTwoRowItemRenderer.navigationEndpoint.watchEndpoint.videoId
+        : track.musicTwoRowItemRenderer.navigationEndpoint?.browseEndpoint?.browseId
+            .split("")
+            .slice(2)
+            .join("") || "",
       authorName:
         track.musicTwoRowItemRenderer.subtitle.runs
           ?.map((run: any) => run.text)

@@ -1,11 +1,5 @@
 import React from "react";
-import {
-  Button,
-  Group,
-  Header as AppHeader,
-  Stack,
-  Title,
-} from "@mantine/core";
+import { Button, Group, Header as AppHeader, Title } from "@mantine/core";
 import { Music } from "tabler-icons-react";
 import { useSession } from "next-auth/react";
 

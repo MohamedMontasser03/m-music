@@ -9,7 +9,7 @@ import {
 import React from "react";
 import { useDispatch } from "react-redux";
 import { trpc } from "../../utils/trpc";
-import { pushTrack } from "../track-player/playerSlice";
+import { pushTrack } from "../../app/track-player/playerSlice";
 
 type Props = {
   type: "playlist" | "track";

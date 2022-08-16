@@ -1,6 +1,5 @@
 import {
   ActionIcon,
-  Button,
   Dialog,
   Group,
   Image,
@@ -8,11 +7,9 @@ import {
   Slider,
   Stack,
   Text,
-  UnstyledButton,
 } from "@mantine/core";
-import React, { DragEvent } from "react";
+import React from "react";
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
-import { useQuery } from "react-query";
 import { useDispatch, useSelector } from "react-redux";
 import {
   PlayerPause,
@@ -24,9 +21,7 @@ import {
   Volume2,
   Volume3,
 } from "tabler-icons-react";
-import { promise } from "zod";
 import { StoreType } from "../../app/store";
-import { trpc } from "../../utils/trpc";
 import {
   pause,
   play,
@@ -35,7 +30,7 @@ import {
   reorder,
   setProgress,
   setVolume,
-} from "./playerSlice";
+} from "../../app/track-player/playerSlice";
 
 export const TrackPlayer: React.FC = () => {
   const {
@@ -59,8 +54,9 @@ export const TrackPlayer: React.FC = () => {
         <Group noWrap>
           <Image
             src={
-              [...queue[idx]?.thumbnails!].sort((a, b) => b.width - a.width)[0]
-                ?.url
+              [...(queue[idx]?.thumbnails || [])].sort(
+                (a, b) => b.width - a.width
+              )[0]?.url
             }
             width={150}
             height={150}

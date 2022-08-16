@@ -10,8 +10,9 @@ import {
 import React, { useCallback, useMemo } from "react";
 import { useDispatch } from "react-redux";
 import { trpc } from "../../utils/trpc";
-import { pushTrack } from "../../app/track-player/playerSlice";
+import { pushTrack, setQueue } from "../../app/track-player/playerSlice";
 import { PlayerPlay } from "tabler-icons-react";
+import { TrackInfo } from "../../server/router/details";
 
 type Props = {
   type: "playlist" | "track";
@@ -47,7 +48,7 @@ export const Tile: React.FC<Props> = ({
 
   const { refetch } = trpc.useQuery(
     [
-      "details.video",
+      `details.${type === "playlist" ? "playlist" : "video"}`,
       {
         id,
       },
@@ -80,21 +81,39 @@ export const Tile: React.FC<Props> = ({
           p={4}
           onClick={() =>
             refetch().then((res) => {
-              const vid = res.data;
-              dispatch(
-                pushTrack({
-                  id: vid?.id!,
-                  title: vid?.title!,
-                  authorName: vid?.author!,
-                  authorId: vid?.authorId!,
-                  duration: +vid?.duration!,
-                  thumbnails: vid?.thumbnails!,
-                  url: vid?.audioFormats[0]?.url!,
-                })
-              );
+              if (type === "track") {
+                const vid = res.data as TrackInfo;
+                dispatch(
+                  setQueue([
+                    {
+                      id: vid?.id!,
+                      title: vid?.title!,
+                      authorName: vid?.author!,
+                      authorId: vid?.authorId!,
+                      duration: +vid?.duration!,
+                      thumbnails: vid?.thumbnails!,
+                      url: vid?.audioFormats[0]?.url!,
+                    },
+                  ])
+                );
+              } else {
+                const playlistInfo = res.data as TrackInfo[];
+                dispatch(
+                  setQueue(
+                    playlistInfo.map((vid) => ({
+                      id: vid?.id!,
+                      title: vid?.title!,
+                      authorName: vid?.author!,
+                      authorId: vid?.authorId!,
+                      duration: +vid?.duration!,
+                      thumbnails: vid?.thumbnails!,
+                      url: vid?.audioFormats[0]?.url!,
+                    }))
+                  )
+                );
+              }
             })
           }
-          disabled={type === "playlist"}
           sx={{
             position: "absolute",
             bottom: 10,

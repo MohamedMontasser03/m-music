@@ -158,6 +158,14 @@ export const playerSlice = createSlice({
       else if (from > state.currentTrack && state.currentTrack >= to)
         state.currentTrack++;
     },
+    setQueue(state, action: PayloadAction<TrackType[]>) {
+      if (!audioController) return;
+      state.queue = action.payload;
+      playerSlice.caseReducers.play(state, {
+        payload: 0,
+        type: "PLAY",
+      });
+    },
   },
 });
 
@@ -171,6 +179,7 @@ export const {
   playPrev,
   pushTrack,
   reorder,
+  setQueue,
 } = playerSlice.actions;
 
 export default playerSlice.reducer;

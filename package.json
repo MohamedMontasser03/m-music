@@ -34,6 +34,7 @@
     "superjson": "^1.9.1",
     "tabler-icons-react": "^1.54.0",
     "ytdl-core": "^4.11.0",
+    "ytpl": "^2.3.0",
     "zod": "^3.17.3"
   },
   "devDependencies": {

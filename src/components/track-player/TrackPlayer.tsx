@@ -43,10 +43,14 @@ export const TrackPlayer: React.FC = () => {
   const dispatch = useDispatch();
   const [isPlaylistOpen, setPlaylistOpen] = React.useState(false);
 
-  const formatTime = (time: number) => {
-    const minutes = Math.floor(time / 60);
+  const formatTime = (time: number, max?: number) => {
+    const includeHours = (max ?? 0) / 3600 > 1 || (time ?? 0) / 3600 > 1;
+    const hours = Math.floor(time / 3600);
+    const minutes = Math.floor(time / 60) % 60;
     const seconds = Math.floor(time % 60);
-    return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+    return `${
+      includeHours ? `${hours}:${minutes < 10 ? "0" : ""}` : ""
+    }${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
   };
   return (
     <>
@@ -75,7 +79,7 @@ export const TrackPlayer: React.FC = () => {
                 width: "100%",
               }}
             >
-              <Text>{formatTime(progress)}</Text>
+              <Text>{formatTime(progress, queue[idx]?.duration)}</Text>
               <Slider
                 label={(v) => formatTime(v)}
                 value={Math.floor(progress)}

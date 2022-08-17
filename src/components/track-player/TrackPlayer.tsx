@@ -8,7 +8,7 @@ import {
   Stack,
   Text,
 } from "@mantine/core";
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -31,6 +31,7 @@ import {
   setProgress,
   setVolume,
 } from "../../app/track-player/playerSlice";
+import { PlaylistView } from "./PlaylistView";
 
 export const TrackPlayer: React.FC = () => {
   const {
@@ -41,7 +42,7 @@ export const TrackPlayer: React.FC = () => {
     volume,
   } = useSelector((state: StoreType) => state.player);
   const dispatch = useDispatch();
-  const [isPlaylistOpen, setPlaylistOpen] = React.useState(false);
+  const [isPlaylistOpen, setPlaylistOpen] = useState(false);
 
   const formatTime = useCallback((time: number, max?: number) => {
     const includeHours = (max ?? 0) / 3600 > 1 || (time ?? 0) / 3600 > 1;
@@ -164,78 +165,12 @@ export const TrackPlayer: React.FC = () => {
           </Stack>
         </Group>
       </Dialog>
-      <Dialog
+      <PlaylistView
+        currentTrack={idx}
         opened={isPlaylistOpen}
-        size="lg"
-        radius="md"
-        position={{
-          right: 40,
-          bottom: 100,
-        }}
-      >
-        <DragDropContext
-          onDragEnd={(result) => {
-            if (!result.destination) return;
-            dispatch(
-              reorder({
-                from: result.source.index,
-                to: result.destination.index,
-              })
-            );
-          }}
-        >
-          <Droppable droppableId="queue">
-            {(provided) => (
-              <ScrollArea
-                style={{
-                  height: "10rem",
-                  overflowY: "auto",
-                }}
-              >
-                <Stack {...provided.droppableProps} ref={provided.innerRef}>
-                  {queue.map((track, i) => (
-                    <Draggable
-                      key={track.title}
-                      draggableId={track.title}
-                      index={i}
-                    >
-                      {(provided) => (
-                        <div
-                          onClick={() => dispatch(play(i))}
-                          {...provided.dragHandleProps}
-                          {...provided.draggableProps}
-                          ref={provided.innerRef}
-                          style={{
-                            ...provided.draggableProps.style,
-                          }}
-                        >
-                          <Group
-                            noWrap
-                            p={4}
-                            sx={{
-                              backgroundColor: i === idx ? "#0066FF55" : "",
-                              borderRadius: 4,
-                            }}
-                          >
-                            <Image
-                              src={track.thumbnails[0]?.url}
-                              width={40}
-                              height={40}
-                              alt={track.title}
-                            />
-                            <Text lineClamp={2}>{track.title}</Text>
-                          </Group>
-                        </div>
-                      )}
-                    </Draggable>
-                  ))}
-                  {provided.placeholder}
-                </Stack>
-              </ScrollArea>
-            )}
-          </Droppable>
-        </DragDropContext>
-      </Dialog>
+        queue={queue}
+        onClose={() => setPlaylistOpen(false)}
+      />
     </>
   );
 };

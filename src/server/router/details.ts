@@ -14,7 +14,6 @@ export type TrackInfo = {
   audioFormats: ytdl.videoFormat[];
   videoFormats: ytdl.videoFormat[];
   videoAudioFormats: ytdl.videoFormat[];
-  format: internal.Readable;
 };
 
 export const detailsRouter = createRouter()
@@ -36,7 +35,6 @@ export const detailsRouter = createRouter()
         videoAudioFormats: vidInfo.formats.filter(
           (f) => f.hasVideo && f.hasAudio
         ),
-        format: ytdl(input.id, { filter: "audioonly" }),
       };
     },
   })
@@ -65,7 +63,6 @@ export const detailsRouter = createRouter()
             videoAudioFormats: vidInfo.formats.filter(
               (f) => f.hasVideo && f.hasAudio
             ),
-            format: ytdl(input.id, { filter: "audioonly" }),
           };
         })
       );

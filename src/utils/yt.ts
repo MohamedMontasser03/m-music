@@ -120,7 +120,8 @@ function formatMusicList(musicList: any) {
       type: isTrack ? "track" : "playlist",
       title: track.musicTwoRowItemRenderer.title.runs[0].text,
       id: isTrack
-        ? track.musicTwoRowItemRenderer.navigationEndpoint.watchEndpoint.videoId
+        ? track.musicTwoRowItemRenderer.navigationEndpoint.watchEndpoint
+            ?.videoId
         : track.musicTwoRowItemRenderer.navigationEndpoint?.browseEndpoint?.browseId
             .split("")
             .slice(2)

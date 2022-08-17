@@ -5,33 +5,31 @@ import { useEffect, useRef } from "react";
 import { TileList } from "../components/tile/TileList";
 import MainLayout from "../layouts";
 import { trpc } from "../utils/trpc";
-import { RecommendationReturnType } from "../utils/yt";
 
 const Home: NextPage = () => {
-  const continuationData = useRef<{
-    continuation?: string;
-    trackingParam?: string;
-  }>({});
-  const { data, isLoading, refetch } = trpc.useQuery(
-    ["recommendation", continuationData.current],
-    {
-      ssr: true,
-      staleTime: Infinity,
-      onSuccess(data) {
-        sections.current.push(...(data?.key?.sections || []));
-      },
-    }
-  );
-  const sections = useRef<RecommendationReturnType["sections"]>([
-    ...(data?.key?.sections || []),
-  ]);
+  const {
+    data: recData,
+    isLoading,
+    fetchNextPage,
+  } = trpc.useInfiniteQuery(["recommendation", {}], {
+    getNextPageParam: (prevPage) => {
+      return {
+        continuation: prevPage?.key?.continuation,
+        trackingParam: prevPage?.key?.trackingParam,
+      };
+    },
+    staleTime: Infinity,
+  });
+
   const { entry, ref } = useIntersection();
 
   useEffect(() => {
-    if (entry?.isIntersecting && data?.key?.continuation && !isLoading) {
-      continuationData.current.continuation = data.key.continuation;
-      continuationData.current.trackingParam = data.key.trackingParam;
-      refetch();
+    if (
+      entry?.isIntersecting &&
+      recData?.pages[recData?.pages.length - 1]?.key?.continuation &&
+      !isLoading
+    ) {
+      fetchNextPage();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [entry]);
@@ -43,13 +41,17 @@ const Home: NextPage = () => {
         <br />
       </Text>
       <div>
-        {sections.current.map((section, idx) => (
-          <div ref={ref} key={section.title + idx}>
-            <TileList section={section} />
-          </div>
-        ))}
+        {recData?.pages.map((item) =>
+          item.key?.sections?.map((section, idx) => (
+            <div ref={ref} key={section.title + idx}>
+              <TileList section={section} />
+            </div>
+          ))
+        )}
       </div>
-      {(!!data?.key?.continuation || isLoading) && (
+      {(!!recData?.pages[recData?.pages.length - 1]?.key?.continuation ||
+        isLoading ||
+        !recData) && (
         <Group align="center" position="center" mt="xl">
           <Loader />
         </Group>

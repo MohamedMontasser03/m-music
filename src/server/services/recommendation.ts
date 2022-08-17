@@ -5,7 +5,7 @@ import {
   ytHeaders,
 } from "../../utils/yt";
 
-export async function getInitialRecommendation({
+export async function getRecommendation({
   continuation,
   trackingParam,
 }: Omit<RecommendationReturnType, "sections">) {

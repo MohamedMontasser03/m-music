@@ -1,4 +1,5 @@
 import {
+  commonYTBody,
   formatRecommendationResults,
   getPublicYoutubeAppKey,
   RecommendationReturnType,
@@ -21,17 +22,7 @@ export async function getRecommendation({
         referrer: "https://music.youtube.com/explore",
         referrerPolicy: "strict-origin-when-cross-origin",
         body: JSON.stringify({
-          context: {
-            client: {
-              hl: "en-GB",
-              gl: "EG",
-              clientName: "WEB_REMIX",
-              clientVersion: "1.20220801.01.00",
-              originalUrl: "https://music.youtube.com/",
-              userAgent:
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:88.0) Gecko/20100101 Firefox/88.0",
-            },
-          },
+          ...commonYTBody,
           browseId: "FEmusic_home",
         }),
         method: "POST",

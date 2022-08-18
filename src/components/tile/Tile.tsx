@@ -45,10 +45,14 @@ export const Tile: React.FC<Props> = ({
 
     return imageUrl;
   }, []);
+  const typeOfId: typeof type = useMemo(
+    () => (id.length === 11 ? "track" : "playlist"),
+    [id]
+  );
 
   const { refetch } = trpc.useQuery(
     [
-      `details.${type === "playlist" ? "playlist" : "video"}`,
+      `details.${typeOfId === "playlist" ? "playlist" : "video"}`,
       {
         id,
       },
@@ -64,7 +68,7 @@ export const Tile: React.FC<Props> = ({
       withBorder
       sx={{
         maxWidth: 250,
-        height: 250 + 150,
+        height: 250 + 175,
       }}
     >
       <Card.Section sx={{ position: "relative" }}>
@@ -81,8 +85,9 @@ export const Tile: React.FC<Props> = ({
           p={4}
           onClick={() =>
             refetch().then((res) => {
-              if (type === "track") {
+              if (typeOfId === "track") {
                 const vid = res.data as TrackInfo;
+                if (!vid) return;
                 dispatch(
                   setQueue([
                     {
@@ -98,6 +103,7 @@ export const Tile: React.FC<Props> = ({
                 );
               } else {
                 const playlistInfo = res.data as TrackInfo[];
+
                 dispatch(
                   setQueue(
                     playlistInfo.map((vid) => ({

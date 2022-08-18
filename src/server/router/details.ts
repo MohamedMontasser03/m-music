@@ -3,6 +3,7 @@ import { z } from "zod";
 import ytdl from "ytdl-core";
 import ytpl from "ytpl";
 import internal from "stream";
+import { ytHeaders } from "../../utils/yt";
 
 export type TrackInfo = {
   id: string;
@@ -44,27 +45,32 @@ export const detailsRouter = createRouter()
     }),
     async resolve({ input }): Promise<TrackInfo[]> {
       const playlistInfo = await ytpl(input.id);
-      return Promise.all(
-        playlistInfo.items.map(async ({ id }) => {
-          const vidInfo = await ytdl.getInfo(id);
-          return {
-            id: vidInfo.videoDetails.videoId,
-            title: vidInfo.videoDetails.title,
-            authorId: vidInfo.videoDetails.author.id,
-            author: vidInfo.videoDetails.author.name,
-            thumbnails: vidInfo.videoDetails.thumbnails,
-            duration: vidInfo.videoDetails.lengthSeconds,
-            audioFormats: vidInfo.formats.filter(
-              (f) => f.hasAudio && !f.hasVideo
-            ),
-            videoFormats: vidInfo.formats.filter(
-              (f) => f.hasVideo && !f.hasAudio
-            ),
-            videoAudioFormats: vidInfo.formats.filter(
-              (f) => f.hasVideo && f.hasAudio
-            ),
-          };
-        })
-      );
+      console.log(playlistInfo);
+      return (
+        await Promise.allSettled(
+          playlistInfo.items.map(async ({ id }) => {
+            const vidInfo = await ytdl.getInfo(id);
+            return {
+              id: vidInfo.videoDetails.videoId,
+              title: vidInfo.videoDetails.title,
+              authorId: vidInfo.videoDetails.author.id,
+              author: vidInfo.videoDetails.author.name,
+              thumbnails: vidInfo.videoDetails.thumbnails,
+              duration: vidInfo.videoDetails.lengthSeconds,
+              audioFormats: vidInfo.formats.filter(
+                (f) => f.hasAudio && !f.hasVideo
+              ),
+              videoFormats: vidInfo.formats.filter(
+                (f) => f.hasVideo && !f.hasAudio
+              ),
+              videoAudioFormats: vidInfo.formats.filter(
+                (f) => f.hasVideo && f.hasAudio
+              ),
+            };
+          })
+        )
+      )
+        .filter((p) => p.status === "fulfilled")
+        .map((p) => (p as PromiseFulfilledResult<TrackInfo>).value);
     },
   });

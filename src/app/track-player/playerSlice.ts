@@ -41,7 +41,8 @@ export const playerSlice = createSlice({
       if (!audioController) return;
       if (
         state.isPlaying &&
-        (action.payload === undefined || state.currentTrack === action.payload)
+        (action.payload === undefined ||
+          audioController.src === state.queue[action.payload]?.url)
       )
         return;
       if (

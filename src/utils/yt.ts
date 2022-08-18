@@ -41,6 +41,20 @@ export const ytHeaders = {
   "x-youtube-client-version": "1.20220801.01.00",
 } as const;
 
+export const commonYTBody = {
+  context: {
+    client: {
+      hl: "en-GB",
+      gl: "EG",
+      clientName: "WEB_REMIX",
+      clientVersion: "1.20220801.01.00",
+      originalUrl: "https://music.youtube.com/",
+      userAgent:
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:88.0) Gecko/20100101 Firefox/88.0",
+    },
+  },
+} as const;
+
 export type RecommendationReturnType = {
   continuation?: string;
   trackingParam?: string;
@@ -116,12 +130,16 @@ function formatMusicList(musicList: any) {
         ?.videoId ||
       musicList?.[0].musicTwoRowItemRenderer.navigationEndpoint?.browseEndpoint
         ?.browseId.length === 17;
+
     return musicList.map((track: any) => ({
       type: isTrack ? "track" : "playlist",
       title: track.musicTwoRowItemRenderer.title.runs[0].text,
       id: isTrack
         ? track.musicTwoRowItemRenderer.navigationEndpoint.watchEndpoint
-            ?.videoId
+            ?.videoId ||
+          track.musicTwoRowItemRenderer.menu.menuRenderer.items[3]
+            .menuServiceItemRenderer.serviceEndpoint.queueAddEndpoint
+            .queueTarget.playlistId
         : track.musicTwoRowItemRenderer.navigationEndpoint?.browseEndpoint?.browseId
             .split("")
             .slice(2)

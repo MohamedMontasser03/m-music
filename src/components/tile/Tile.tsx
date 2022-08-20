@@ -8,11 +8,9 @@ import {
   UnstyledButton,
 } from "@mantine/core";
 import React, { useCallback, useMemo } from "react";
-import { useDispatch } from "react-redux";
 import { trpc } from "../../utils/trpc";
-import { pushTrack, setQueue } from "../../app/track-player/playerSlice";
+import { TrackType, usePlayerStore } from "../../app/track-player/playerSlice";
 import { PlayerPlay } from "tabler-icons-react";
-import { TrackInfo } from "../../server/router/details";
 
 type Props = {
   type: "playlist" | "track";
@@ -33,7 +31,7 @@ export const Tile: React.FC<Props> = ({
   thumbnails,
   authorName,
 }) => {
-  const dispatch = useDispatch();
+  const setQueue = usePlayerStore((state) => state.actions.setQueue);
   const thumb = useMemo(
     () => thumbnails.sort((a, b) => a.width - b.width)[0],
     [thumbnails]
@@ -86,36 +84,30 @@ export const Tile: React.FC<Props> = ({
           onClick={() =>
             refetch().then((res) => {
               if (typeOfId === "track") {
-                const vid = res.data as TrackInfo;
+                const vid = res.data as TrackType;
                 if (!vid) return;
-                dispatch(
-                  setQueue([
-                    {
-                      id: vid?.id!,
-                      title: vid?.title!,
-                      authorName: vid?.author!,
-                      authorId: vid?.authorId!,
-                      duration: +vid?.duration!,
-                      thumbnails: vid?.thumbnails!,
-                      url: vid?.audioFormats[0]?.url!,
-                    },
-                  ])
-                );
+                setQueue([
+                  {
+                    id: vid?.id!,
+                    title: vid?.title!,
+                    authorName: vid?.authorName!,
+                    authorId: vid?.authorId!,
+                    duration: vid?.duration!,
+                    thumbnails: vid?.thumbnails!,
+                  },
+                ]);
               } else {
-                const playlistInfo = res.data as TrackInfo[];
+                const playlistInfo = res.data as TrackType[];
 
-                dispatch(
-                  setQueue(
-                    playlistInfo.map((vid) => ({
-                      id: vid?.id!,
-                      title: vid?.title!,
-                      authorName: vid?.author!,
-                      authorId: vid?.authorId!,
-                      duration: +vid?.duration!,
-                      thumbnails: vid?.thumbnails!,
-                      url: vid?.audioFormats[0]?.url!,
-                    }))
-                  )
+                setQueue(
+                  playlistInfo.map((vid) => ({
+                    id: vid?.id!,
+                    title: vid?.title!,
+                    authorName: vid?.authorName!,
+                    authorId: vid?.authorId!,
+                    duration: vid?.duration!,
+                    thumbnails: vid?.thumbnails!,
+                  }))
                 );
               }
             })

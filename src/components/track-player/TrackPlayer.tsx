@@ -9,8 +9,6 @@ import {
   Text,
 } from "@mantine/core";
 import React, { useCallback, useState } from "react";
-import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
-import { useDispatch, useSelector } from "react-redux";
 import {
   PlayerPause,
   PlayerPlay,
@@ -21,16 +19,7 @@ import {
   Volume2,
   Volume3,
 } from "tabler-icons-react";
-import { StoreType } from "../../app/store";
-import {
-  pause,
-  play,
-  playNext,
-  playPrev,
-  reorder,
-  setProgress,
-  setVolume,
-} from "../../app/track-player/playerSlice";
+import { usePlayerStore } from "../../app/track-player/playerSlice";
 import { PlaylistView } from "./PlaylistView";
 
 export const TrackPlayer: React.FC = () => {
@@ -40,8 +29,8 @@ export const TrackPlayer: React.FC = () => {
     isPlaying,
     progress,
     volume,
-  } = useSelector((state: StoreType) => state.player);
-  const dispatch = useDispatch();
+    actions: { pause, play, setProgress, setVolume, playNext, playPrev },
+  } = usePlayerStore();
   const [isPlaylistOpen, setPlaylistOpen] = useState(false);
 
   const formatTime = useCallback((time: number, max?: number) => {
@@ -86,10 +75,8 @@ export const TrackPlayer: React.FC = () => {
                 label={(v) => formatTime(v)}
                 value={Math.floor(progress)}
                 max={queue[idx]?.duration}
-                onChange={(value) => dispatch(setProgress({ value }))}
-                onChangeEnd={(value) =>
-                  dispatch(setProgress({ value, play: true }))
-                }
+                onChange={(value) => setProgress(value)}
+                onChangeEnd={(value) => setProgress(value, true)}
                 sx={{
                   flexGrow: 1,
                 }}
@@ -125,21 +112,21 @@ export const TrackPlayer: React.FC = () => {
                   value={volume}
                   max={1}
                   step={0.01}
-                  onChange={(v) => dispatch(setVolume(v))}
+                  onChange={(v) => setVolume(v)}
                 />
               </Group>
               <Group>
                 <ActionIcon
                   variant="outline"
                   radius="xl"
-                  onClick={() => dispatch(playPrev())}
+                  onClick={() => playPrev()}
                 >
                   <PlayerTrackPrev size={15} />
                 </ActionIcon>
                 <ActionIcon
                   variant="outline"
                   radius="xl"
-                  onClick={() => dispatch(isPlaying ? pause() : play())}
+                  onClick={() => (isPlaying ? pause() : play())}
                 >
                   {isPlaying ? (
                     <PlayerPause size={15} />
@@ -151,7 +138,7 @@ export const TrackPlayer: React.FC = () => {
                   disabled={idx === queue.length - 1}
                   variant="outline"
                   radius="xl"
-                  onClick={() => dispatch(playNext())}
+                  onClick={() => playNext()}
                 >
                   <PlayerTrackNext size={15} />
                 </ActionIcon>

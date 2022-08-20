@@ -8,9 +8,8 @@ import {
   Stack,
   Text,
 } from "@mantine/core";
-import { useDispatch } from "react-redux";
 import { ArrowsShuffle, Cross, RepeatOff, X } from "tabler-icons-react";
-import { play, TrackType } from "../../app/track-player/playerSlice";
+import { TrackType, usePlayerStore } from "../../app/track-player/playerSlice";
 
 type Props = {
   opened: boolean;
@@ -25,7 +24,7 @@ export const PlaylistView: React.FC<Props> = ({
   currentTrack: idx,
   onClose,
 }) => {
-  const dispatch = useDispatch();
+  const play = usePlayerStore((state) => state.actions.play);
 
   return (
     <Dialog
@@ -60,7 +59,7 @@ export const PlaylistView: React.FC<Props> = ({
           {queue.map((track, i) => (
             <Button
               key={track.title}
-              onClick={() => dispatch(play(i))}
+              onClick={() => play(i)}
               variant={idx !== i ? "subtle" : "light"}
               styles={{
                 inner: {

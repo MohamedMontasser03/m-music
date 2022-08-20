@@ -6,8 +6,7 @@ import superjson from "superjson";
 import { SessionProvider } from "next-auth/react";
 import "../styles/globals.css";
 import { MantineProvider } from "@mantine/core";
-import { Provider } from "react-redux";
-import { store } from "../app/store";
+import { createTRPCClient } from "@trpc/client";
 
 const MyApp: AppType = ({
   Component,
@@ -22,9 +21,7 @@ const MyApp: AppType = ({
           colorScheme: "dark",
         }}
       >
-        <Provider store={store}>
-          <Component {...pageProps} />
-        </Provider>
+        <Component {...pageProps} />
       </MantineProvider>
     </SessionProvider>
   );
@@ -61,3 +58,8 @@ export default withTRPC<AppRouter>({
    */
   ssr: true,
 })(MyApp);
+
+export const client = createTRPCClient<AppRouter>({
+  url: `${getBaseUrl()}/api/trpc`,
+  transformer: superjson,
+});

@@ -2,7 +2,7 @@ import { createRouter } from "./context";
 import { z } from "zod";
 import ytdl from "ytdl-core";
 import ytpl from "ytpl";
-import { type TrackType } from "../../app/track-player/playerSlice";
+import type { TrackType } from "../../app/track-player/playerSlice";
 
 export const detailsRouter = createRouter()
   .query(".video", {

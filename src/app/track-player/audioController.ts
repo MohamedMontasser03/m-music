@@ -1,6 +1,18 @@
 import { usePlayerStore } from "./playerSlice";
 
-export const audioController = (() => {
+type AudioController = {
+  readonly setSrc: (src: string) => string;
+  readonly getSrc: () => string;
+  readonly pause: () => void;
+  readonly play: () => Promise<void>;
+  readonly getIsPlaying: () => boolean;
+  readonly getDuration: () => number;
+  readonly getCurrentTime: () => number;
+  readonly setCurrentTime: (time: number) => number;
+  readonly setVolume: (volume: number) => number;
+};
+
+export const audioController: AudioController | undefined = (() => {
   if (typeof window === "undefined") return undefined;
   const el = new Audio();
 
@@ -47,5 +59,5 @@ export const audioController = (() => {
     getCurrentTime: () => el.currentTime,
     setCurrentTime: (time: number) => (el.currentTime = time),
     setVolume: (volume: number) => (el.volume = volume),
-  } as const;
+  } as AudioController;
 })();

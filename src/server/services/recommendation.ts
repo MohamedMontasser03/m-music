@@ -32,6 +32,6 @@ export async function getRecommendation({
     );
     return formatRecommendationResults(await res.json());
   } catch (err) {
-    console.error("Broke", err);
+    console.error("An error occurred while fetching video data", err);
   }
 }

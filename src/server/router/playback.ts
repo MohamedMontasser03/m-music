@@ -6,7 +6,9 @@ export const playbackRouter = createRouter().query(".audio", {
   input: z.object({
     id: z.string(),
   }),
-  async resolve({ input }) {
+  async resolve({ input }): Promise<{
+    url?: string;
+  }> {
     const vidInfo = await ytdl.getInfo(input.id);
     const audioFormats = ytdl.filterFormats(vidInfo.formats, "audioonly");
     return {

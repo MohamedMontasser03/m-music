@@ -34,11 +34,14 @@ type stateType = {
   actions: {
     pause: () => void;
     play: (newIdx?: number) => void;
+    syncLoadingState: () => void;
     syncProgress: () => void;
     setProgress: (progress: number, end?: boolean) => void;
     playNext: () => void;
     playPrev: () => void;
     setVolume: (newVolume: number) => void;
+    pushTrack: (track: TrackType) => void;
+    reorderQueue: (from: number, to: number) => void;
     setQueue: (newQueue: TrackType[]) => void;
   };
 };
@@ -67,54 +70,96 @@ export const usePlayerStore = create<stateType>((set, get) => ({
       audioController?.pause();
     },
     play(newIdx?: number) {
-      const { isPlaying, queue, playingData, loadingState } = get();
+      const {
+        isPlaying,
+        queue,
+        playingData,
+        loadingState,
+        currentTrack,
+        actions: { play },
+      } = get();
       if (!audioController) return;
       if (isPlaying && newIdx === undefined) return;
       if (newIdx !== undefined && (newIdx < 0 || newIdx > queue.length - 1))
         return;
-      if (newIdx !== undefined && playingData.id !== queue[newIdx]?.id) {
+      if (
+        (newIdx !== undefined && playingData.id !== queue[newIdx]?.id) ||
+        loadingState === "initialUrl"
+      ) {
         set((state) => ({
           ...state,
-          currentTrack: newIdx,
+          currentTrack: newIdx ?? state.currentTrack,
           playingData: {
-            id: queue[newIdx]!.id,
+            id: queue[newIdx ?? state.currentTrack]!.id,
             url: "",
           },
-          loadingState: "initialUrl",
+          loadingState:
+            loadingState === "initialUrl" ? "ErrorUrl" : "initialUrl",
           isPlaying: false,
         }));
 
         audioController.setCurrentTime(0);
         audioController?.pause();
-        getAudioUrl(queue[newIdx]!.id).then((url) => {
-          set((state) => ({
+        getAudioUrl(queue[newIdx ?? currentTrack]!.id)
+          .then(({ url, id }) => {
+            set((state) =>
+              id === state.playingData.id
+                ? {
+                    ...state,
+                    playingData: {
+                      id: state.playingData.id,
+                      url,
+                    },
+                    loadingState: "Done",
+                    isPlaying: true,
+                  }
+                : state
+            );
+            audioController?.setSrc(url);
+            audioController?.play();
+          })
+          .catch((err) => {
+            console.error(err);
+            set((state) => {
+              state.loadingState === "initialUrl" && state.actions.play();
+              return {
+                ...state,
+                loadingState:
+                  state.loadingState === "ErrorUrl" ? "ErrorFail" : "ErrorUrl",
+              };
+            });
+          });
+        return;
+      }
+      set((state) => ({
+        ...state,
+        isPlaying: true,
+      }));
+      audioController?.play();
+      return;
+    },
+    syncLoadingState() {
+      if (!audioController) return;
+      set((state) => {
+        let loadingState = state.loadingState;
+        if (audioController?.getError()) {
+          loadingState !== "ErrorFail" && state.actions.play();
+          return {
             ...state,
-            playingData: {
-              id: state.playingData.id,
-              url,
-            },
-            loadingState: "Done",
-            isPlaying: true,
-          }));
-          audioController?.setSrc(url);
-          audioController?.play();
-        });
-        // .catch(() => {
-        //   state.isLoading.urlError = true;
-        // })
-        // .finally(() => {
-        //   state.isLoading.urlInitial = false;
-        // });
-        return;
-      }
-      if (loadingState !== "initialUrl") {
-        set((state) => ({
+            loadingState:
+              loadingState !== "ErrorFail" ? "ErrorFail" : "ErrorUrl",
+          };
+        }
+        if (["Done", "LoadingData"].includes(loadingState)) {
+          loadingState = audioController?.getIsLoading()
+            ? "LoadingData"
+            : "Done";
+        }
+        return {
           ...state,
-          isPlaying: true,
-        }));
-        audioController?.play();
-        return;
-      }
+          loadingState,
+        };
+      });
     },
     syncProgress() {
       if (!audioController) return;
@@ -190,44 +235,41 @@ export const usePlayerStore = create<stateType>((set, get) => ({
       }));
       audioController.setVolume(newVolume);
     },
-    // pushTrack(state, action: PayloadAction<TrackType>) {
-    //   if (!audioController) return;
-    //   if (state.queue.some((t) => t.id === action.payload.id)) return;
-    //   state.queue = [...state.queue, action.payload];
-    //   playerSlice.caseReducers.play(state, {
-    //     payload: state.queue.length - 1,
-    //     type: "PLAY",
-    //   });
-    // },
-    // reorder(
-    //   state,
-    //   action: PayloadAction<{
-    //     from: number;
-    //     to: number;
-    //   }>
-    // ) {
-    //   if (!audioController) return;
-    //   const { from, to } = action.payload;
-    //   if (from === to) return;
-    //   if (
-    //     from < 0 ||
-    //     from >= state.queue.length ||
-    //     to < 0 ||
-    //     to >= state.queue.length
-    //   )
-    //     return;
-    //   const newQueue = [...state.queue];
-    //   const [removed] = newQueue.splice(from, 1);
-    //   newQueue.splice(to, 0, removed!);
-    //   state.queue = newQueue;
-    //   // update currentTrack if it's in the queue
-    //   if (state.currentTrack === from) {
-    //     state.currentTrack = to;
-    //   } else if (from < state.currentTrack && state.currentTrack <= to)
-    //     state.currentTrack--;
-    //   else if (from > state.currentTrack && state.currentTrack >= to)
-    //     state.currentTrack++;
-    // },
+    pushTrack(track: TrackType) {
+      const {
+        queue,
+        actions: { play },
+      } = get();
+      if (!audioController) return;
+      if (queue.some((t) => t.id === track.id)) return;
+      set((state) => ({
+        ...state,
+        queue: [...state.queue, track],
+      }));
+      play(queue.length - 1);
+    },
+    reorderQueue(from: number, to: number) {
+      const { queue } = get();
+      if (!audioController) return;
+      if (from === to) return;
+      if (from < 0 || from >= queue.length || to < 0 || to >= queue.length)
+        return;
+      const newQueue = [...queue];
+      const [removed] = newQueue.splice(from, 1);
+      newQueue.splice(to, 0, removed!);
+      set((state) => {
+        let currentTrack = state.currentTrack;
+        if (currentTrack === from) {
+          currentTrack = to;
+        } else if (from < currentTrack && currentTrack <= to) currentTrack--;
+        else if (from > currentTrack && currentTrack >= to) currentTrack++;
+        return {
+          ...state,
+          queue: newQueue,
+          currentTrack,
+        };
+      });
+    },
     setQueue(newQueue: TrackType[]) {
       const {
         actions: { play },
@@ -245,5 +287,5 @@ export const usePlayerStore = create<stateType>((set, get) => ({
 const getAudioUrl = async (id: string) => {
   const query = await client.query("playback.audio", { id });
   if (!query.url) throw new Error("No url found");
-  return query.url;
+  return { url: query.url, id };
 };

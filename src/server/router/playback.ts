@@ -9,10 +9,16 @@ export const playbackRouter = createRouter().query(".audio", {
   async resolve({ input }): Promise<{
     url?: string;
   }> {
-    const vidInfo = await ytdl.getInfo(input.id);
-    const audioFormats = ytdl.filterFormats(vidInfo.formats, "audioonly");
-    return {
-      url: audioFormats[0]?.url,
-    };
+    try {
+      const vidInfo = await ytdl.getInfo(input.id);
+      const audioFormats = ytdl.filterFormats(vidInfo.formats, "audioonly");
+
+      return {
+        url: "audioFormats[0]?.url",
+      };
+    } catch (error) {
+      console.error(error);
+      return {};
+    }
   },
 });

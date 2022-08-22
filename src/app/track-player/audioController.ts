@@ -10,6 +10,8 @@ type AudioController = {
   readonly getCurrentTime: () => number;
   readonly setCurrentTime: (time: number) => number;
   readonly setVolume: (volume: number) => number;
+  readonly getIsLoading: () => boolean;
+  readonly getError: () => MediaError | null;
 };
 
 export const audioController: AudioController | undefined = (() => {
@@ -29,21 +31,21 @@ export const audioController: AudioController | undefined = (() => {
     usePlayerStore.getState().actions.playNext();
   });
 
-  // el.addEventListener("loadstart", () => {
-  //   console.log("load-start", el.readyState);
-  // });
-  // el.addEventListener("loadeddata", () => {
-  //   console.log("load success", el.readyState);
-  // });
-  // el.addEventListener("waiting", () => {
-  //   console.log("waiting", el.readyState);
-  // });
-  // el.addEventListener("error", () => {
-  //   console.log("error while loading state", el.readyState);
-  // });
-  // el.addEventListener("canplay", () => {
-  //   console.log("no error and done waiting while loading state", el.readyState);
-  // });
+  el.addEventListener("loadstart", () => {
+    usePlayerStore.getState().actions.syncLoadingState();
+  });
+  el.addEventListener("loadeddata", () => {
+    usePlayerStore.getState().actions.syncLoadingState();
+  });
+  el.addEventListener("waiting", () => {
+    usePlayerStore.getState().actions.syncLoadingState();
+  });
+  el.addEventListener("canplay", () => {
+    usePlayerStore.getState().actions.syncLoadingState();
+  });
+  el.addEventListener("error", () => {
+    usePlayerStore.getState().actions.syncLoadingState();
+  });
 
   return {
     setSrc: (src: string) => (el.src = src),
@@ -59,5 +61,7 @@ export const audioController: AudioController | undefined = (() => {
     getCurrentTime: () => el.currentTime,
     setCurrentTime: (time: number) => (el.currentTime = time),
     setVolume: (volume: number) => (el.volume = volume),
+    getIsLoading: () => el.readyState <= el.HAVE_CURRENT_DATA,
+    getError: () => el.error,
   } as AudioController;
 })();

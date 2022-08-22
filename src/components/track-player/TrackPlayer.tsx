@@ -30,6 +30,7 @@ export const TrackPlayer: React.FC = () => {
     progress,
     volume,
     actions: { pause, play, setProgress, setVolume, playNext, playPrev },
+    loadingState,
   } = usePlayerStore();
   const [isPlaylistOpen, setPlaylistOpen] = useState(false);
 
@@ -126,7 +127,10 @@ export const TrackPlayer: React.FC = () => {
                 <ActionIcon
                   variant="outline"
                   radius="xl"
-                  onClick={() => (isPlaying ? pause() : play())}
+                  onClick={() =>
+                    ["initialUrl", "ErrorUrl"].includes(loadingState) &&
+                    (isPlaying ? pause() : play())
+                  }
                 >
                   {isPlaying ? (
                     <PlayerPause size={15} />
@@ -158,6 +162,14 @@ export const TrackPlayer: React.FC = () => {
         queue={queue}
         onClose={() => setPlaylistOpen(false)}
       />
+      <Dialog
+        opened
+        position={{
+          top: 0,
+        }}
+      >
+        {loadingState}
+      </Dialog>
     </>
   );
 };

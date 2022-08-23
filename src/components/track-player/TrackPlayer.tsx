@@ -128,7 +128,7 @@ export const TrackPlayer: React.FC = () => {
                   variant="outline"
                   radius="xl"
                   onClick={() =>
-                    ["initialUrl", "ErrorUrl"].includes(loadingState) &&
+                    !["initialUrl", "ErrorUrl"].includes(loadingState) &&
                     (isPlaying ? pause() : play())
                   }
                 >
@@ -163,7 +163,7 @@ export const TrackPlayer: React.FC = () => {
         onClose={() => setPlaylistOpen(false)}
       />
       <Dialog
-        opened
+        opened={queue.length > 0 && loadingState !== "Done"}
         position={{
           top: 0,
         }}

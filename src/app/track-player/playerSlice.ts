@@ -70,14 +70,8 @@ export const usePlayerStore = create<stateType>((set, get) => ({
       audioController?.pause();
     },
     play(newIdx?: number) {
-      const {
-        isPlaying,
-        queue,
-        playingData,
-        loadingState,
-        currentTrack,
-        actions: { play },
-      } = get();
+      const { isPlaying, queue, playingData, loadingState, currentTrack } =
+        get();
       if (!audioController) return;
       if (isPlaying && newIdx === undefined) return;
       if (newIdx !== undefined && (newIdx < 0 || newIdx > queue.length - 1))
@@ -173,7 +167,6 @@ export const usePlayerStore = create<stateType>((set, get) => ({
       if (!audioController) return;
       if (progress > audioController.getDuration() || progress < 0) return;
       if (isPlaying && !end) {
-        // state.isPlaying = false;
         audioController?.pause();
       }
 

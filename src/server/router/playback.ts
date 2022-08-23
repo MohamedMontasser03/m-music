@@ -14,7 +14,7 @@ export const playbackRouter = createRouter().query(".audio", {
       const audioFormats = ytdl.filterFormats(vidInfo.formats, "audioonly");
 
       return {
-        url: "audioFormats[0]?.url",
+        url: audioFormats[0]?.url,
       };
     } catch (error) {
       console.error(error);

@@ -75,6 +75,7 @@ export const PlaylistView: React.FC<Props> = ({
                   width={40}
                   height={40}
                   alt={track.title}
+                  withPlaceholder
                 />
                 <Text
                   style={{

@@ -11,7 +11,13 @@ import { useSession } from "next-auth/react";
 import React from "react";
 import { Books, Heart, History, Home, Search } from "tabler-icons-react";
 
-export type Page = "home" | "search" | "my-library" | "recent" | "liked";
+export type Page =
+  | "home"
+  | "search"
+  | "my-library"
+  | "recent"
+  | "liked"
+  | "none";
 
 type Props = {
   currentTab?: Page;

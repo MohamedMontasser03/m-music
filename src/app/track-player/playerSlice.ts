@@ -1,6 +1,7 @@
 import { client } from "../../pages/_app";
 import { audioController } from "./audioController";
 import create from "zustand";
+import Router from "next/router";
 
 export type TrackType = {
   title: string;
@@ -23,10 +24,10 @@ type stateType = {
   volume: number;
   loadingState:
     | "initialUrl"
-    | "ErrorUrl"
-    | "LoadingData"
-    | "ErrorFail"
-    | "Done";
+    | "errorUrl"
+    | "loadingData"
+    | "errorFail"
+    | "done";
   playingData: {
     id: string;
     url: string;
@@ -52,7 +53,7 @@ export const usePlayerStore = create<stateType>((set, get) => ({
   isPlaying: false,
   progress: 0,
   volume: 1,
-  loadingState: "Done",
+  loadingState: "done",
   playingData: {
     url: "",
     id: "",
@@ -88,7 +89,7 @@ export const usePlayerStore = create<stateType>((set, get) => ({
             url: "",
           },
           loadingState:
-            loadingState === "initialUrl" ? "ErrorUrl" : "initialUrl",
+            loadingState === "initialUrl" ? "errorUrl" : "initialUrl",
           isPlaying: false,
         }));
 
@@ -104,7 +105,7 @@ export const usePlayerStore = create<stateType>((set, get) => ({
                       id: state.playingData.id,
                       url,
                     },
-                    loadingState: "Done",
+                    loadingState: "done",
                     isPlaying: true,
                   }
                 : state
@@ -119,7 +120,7 @@ export const usePlayerStore = create<stateType>((set, get) => ({
               return {
                 ...state,
                 loadingState:
-                  state.loadingState === "ErrorUrl" ? "ErrorFail" : "ErrorUrl",
+                  state.loadingState === "errorUrl" ? "errorFail" : "errorUrl",
               };
             });
           });
@@ -137,17 +138,28 @@ export const usePlayerStore = create<stateType>((set, get) => ({
       set((state) => {
         let loadingState = state.loadingState;
         if (audioController?.getError()) {
-          loadingState !== "ErrorFail" && state.actions.play();
+          if (loadingState !== "errorFail") {
+            state.actions.pause();
+            Router.push("/error");
+          }
           return {
             ...state,
             loadingState:
-              loadingState !== "ErrorFail" ? "ErrorFail" : "ErrorUrl",
+              loadingState !== "errorFail" ? "errorFail" : "errorUrl",
+            queue: loadingState !== "errorFail" ? [] : state.queue,
+            playingData:
+              loadingState !== "errorFail"
+                ? {
+                    url: "",
+                    id: "",
+                  }
+                : state.playingData,
           };
         }
-        if (["Done", "LoadingData"].includes(loadingState)) {
+        if (["done", "loadingData"].includes(loadingState)) {
           loadingState = audioController?.getIsLoading()
-            ? "LoadingData"
-            : "Done";
+            ? "loadingData"
+            : "done";
         }
         return {
           ...state,

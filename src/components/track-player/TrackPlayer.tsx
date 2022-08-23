@@ -3,7 +3,7 @@ import {
   Dialog,
   Group,
   Image,
-  ScrollArea,
+  Skeleton,
   Slider,
   Stack,
   Text,
@@ -57,6 +57,7 @@ export const TrackPlayer: React.FC = () => {
             width={150}
             height={150}
             alt={queue[idx]?.title}
+            withPlaceholder
           />
           <Stack
             sx={{
@@ -72,16 +73,25 @@ export const TrackPlayer: React.FC = () => {
               }}
             >
               <Text>{formatTime(progress, queue[idx]?.duration)}</Text>
-              <Slider
-                label={(v) => formatTime(v)}
-                value={Math.floor(progress)}
-                max={queue[idx]?.duration}
-                onChange={(value) => setProgress(value)}
-                onChangeEnd={(value) => setProgress(value, true)}
+              <Skeleton
+                visible={["initialUrl", "errorUrl"].includes(loadingState)}
                 sx={{
+                  width: "unset",
                   flexGrow: 1,
                 }}
-              />
+              >
+                <Slider
+                  label={(v) => formatTime(v)}
+                  value={Math.floor(progress)}
+                  max={queue[idx]?.duration}
+                  onChange={(value) => setProgress(value)}
+                  onChangeEnd={(value) => setProgress(value, true)}
+                  classNames={{
+                    root:
+                      loadingState === "loadingData" ? "brightnessLoader" : "",
+                  }}
+                />
+              </Skeleton>
               <Text>{formatTime(queue[idx]?.duration || 0)}</Text>
             </Group>
             <Group
@@ -124,20 +134,24 @@ export const TrackPlayer: React.FC = () => {
                 >
                   <PlayerTrackPrev size={15} />
                 </ActionIcon>
-                <ActionIcon
-                  variant="outline"
-                  radius="xl"
-                  onClick={() =>
-                    !["initialUrl", "ErrorUrl"].includes(loadingState) &&
-                    (isPlaying ? pause() : play())
-                  }
+                <Skeleton
+                  visible={["initialUrl", "errorUrl"].includes(loadingState)}
+                  width={28}
+                  height={28}
+                  circle
                 >
-                  {isPlaying ? (
-                    <PlayerPause size={15} />
-                  ) : (
-                    <PlayerPlay size={15} />
-                  )}
-                </ActionIcon>
+                  <ActionIcon
+                    variant="outline"
+                    radius="xl"
+                    onClick={() => (isPlaying ? pause() : play())}
+                  >
+                    {isPlaying ? (
+                      <PlayerPause size={15} />
+                    ) : (
+                      <PlayerPlay size={15} />
+                    )}
+                  </ActionIcon>
+                </Skeleton>
                 <ActionIcon
                   disabled={idx === queue.length - 1}
                   variant="outline"
@@ -163,9 +177,10 @@ export const TrackPlayer: React.FC = () => {
         onClose={() => setPlaylistOpen(false)}
       />
       <Dialog
-        opened={queue.length > 0 && loadingState !== "Done"}
+        opened={queue.length > 0 && loadingState !== "done"}
         position={{
-          top: 0,
+          bottom: 0,
+          left: 0,
         }}
       >
         {loadingState}

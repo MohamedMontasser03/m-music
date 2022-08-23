@@ -1,0 +1,21 @@
+@keyframes brightnessLoader {
+    0% {
+        filter: brightness(1);
+    }
+    25% {
+        filter: brightness(1.2);
+    }
+    50% {
+        filter: brightness(1);
+    }
+    75% {
+        filter: brightness(0.8);
+    }
+    100% {
+        filter: brightness(1);
+    }
+}
+
+.brightnessLoader {
+    animation: brightnessLoader 0.7s infinite;
+}

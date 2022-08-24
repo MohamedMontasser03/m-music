@@ -30,6 +30,7 @@ type stateType = {
     | "done";
   playingData: {
     id: string;
+    fetchingUrl: boolean;
     url: string;
   };
   actions: {
@@ -56,6 +57,7 @@ export const usePlayerStore = create<stateType>((set, get) => ({
   loadingState: "done",
   playingData: {
     url: "",
+    fetchingUrl: false,
     id: "",
   },
   actions: {
@@ -63,7 +65,7 @@ export const usePlayerStore = create<stateType>((set, get) => ({
       if (!audioController) return;
       const {
         loadingState: prevState,
-        actions: { pause },
+        actions: { pause, play },
       } = get();
       let loadingState = prevState;
 
@@ -81,6 +83,8 @@ export const usePlayerStore = create<stateType>((set, get) => ({
         loadingState = loadingState === "initialUrl" ? "errorUrl" : "errorFail";
       }
 
+      loadingState === "errorUrl" && play();
+
       if (loadingState === "errorFail") {
         pause();
         Router.push("/error");
@@ -94,6 +98,7 @@ export const usePlayerStore = create<stateType>((set, get) => ({
           loadingState === "errorFail"
             ? {
                 url: "",
+                fetchingUrl: false,
                 id: "",
               }
             : state.playingData,
@@ -120,35 +125,47 @@ export const usePlayerStore = create<stateType>((set, get) => ({
     },
     play(newIdx?: number) {
       const {
-        isPlaying,
         queue,
         playingData,
-        loadingState,
         currentTrack,
         actions: { syncLoadingState },
       } = get();
       if (!audioController) return;
-      if (isPlaying && newIdx === undefined) return;
       if (newIdx !== undefined && (newIdx < 0 || newIdx > queue.length - 1))
         return;
       if (
-        (newIdx !== undefined && playingData.id !== queue[newIdx]?.id) ||
-        loadingState === "initialUrl"
-      ) {
+        newIdx !== undefined &&
+        playingData.id === queue[newIdx]?.id &&
+        playingData.fetchingUrl
+      )
+        return;
+      if (newIdx === undefined && playingData.fetchingUrl) return;
+
+      if (newIdx !== undefined && playingData.id !== queue[newIdx]?.id) {
+        audioController?.pause();
+
         set((state) => ({
           ...state,
           currentTrack: newIdx ?? state.currentTrack,
           playingData: {
             id: queue[newIdx ?? state.currentTrack]!.id,
+            fetchingUrl: false,
             url: "",
           },
-          loadingState:
-            loadingState === "initialUrl" ? "errorUrl" : "initialUrl",
+          loadingState: "initialUrl",
           isPlaying: false,
           progress: 0,
         }));
+      }
 
-        audioController?.pause();
+      if (isFetchingUrl(get().loadingState) && !get().playingData.fetchingUrl) {
+        set((state) => ({
+          ...state,
+          playingData: {
+            ...state.playingData,
+            fetchingUrl: true,
+          },
+        }));
         getAudioUrl(queue[newIdx ?? currentTrack]!.id)
           .then(({ url, id }) => {
             if (id !== get().playingData.id) return;
@@ -156,6 +173,7 @@ export const usePlayerStore = create<stateType>((set, get) => ({
               ...state,
               playingData: {
                 id: state.playingData.id,
+                fetchingUrl: false,
                 url,
               },
               loadingState: "done",
@@ -169,17 +187,23 @@ export const usePlayerStore = create<stateType>((set, get) => ({
             if (queue[newIdx ?? currentTrack]!.id !== get().playingData.id)
               return;
             console.error(err);
+            set((state) => ({
+              ...state,
+              playingData: {
+                ...state.playingData,
+                fetchingUrl: false,
+              },
+            }));
             syncLoadingState();
-            get().loadingState === "initialUrl" && get().actions.play();
           });
         return;
       }
+
       set((state) => ({
         ...state,
         isPlaying: true,
       }));
       audioController?.play();
-      return;
     },
     setProgress(progress: number, end?: boolean) {
       const {

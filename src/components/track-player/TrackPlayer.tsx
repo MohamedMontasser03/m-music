@@ -19,7 +19,10 @@ import {
   Volume2,
   Volume3,
 } from "tabler-icons-react";
-import { usePlayerStore } from "../../app/track-player/playerSlice";
+import {
+  isFetchingUrl,
+  usePlayerStore,
+} from "../../app/track-player/playerSlice";
 import { PlaylistView } from "./PlaylistView";
 
 export const TrackPlayer: React.FC = () => {
@@ -74,7 +77,7 @@ export const TrackPlayer: React.FC = () => {
             >
               <Text>{formatTime(progress, queue[idx]?.duration)}</Text>
               <Skeleton
-                visible={["initialUrl", "errorUrl"].includes(loadingState)}
+                visible={isFetchingUrl(loadingState)}
                 sx={{
                   width: "unset",
                   flexGrow: 1,
@@ -135,7 +138,7 @@ export const TrackPlayer: React.FC = () => {
                   <PlayerTrackPrev size={15} />
                 </ActionIcon>
                 <Skeleton
-                  visible={["initialUrl", "errorUrl"].includes(loadingState)}
+                  visible={isFetchingUrl(loadingState)}
                   width={28}
                   height={28}
                   circle

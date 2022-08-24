@@ -47,16 +47,18 @@ export const audioController: AudioController | undefined = (() => {
     usePlayerStore.getState().actions.syncLoadingState();
   });
 
+  const getIsPlaying = () =>
+    el?.currentTime > 0 &&
+    !el?.paused &&
+    !el?.ended &&
+    el?.readyState > el?.HAVE_CURRENT_DATA;
+
   return {
     setSrc: (src: string) => (el.src = src),
     getSrc: () => el.src,
-    pause: () => el.pause(),
-    play: () => el.play(),
-    getIsPlaying: () =>
-      el?.currentTime > 0 &&
-      !el?.paused &&
-      !el?.ended &&
-      el?.readyState > el?.HAVE_CURRENT_DATA,
+    pause: () => getIsPlaying() && el.pause(),
+    play: () => !getIsPlaying() && el.play(),
+    getIsPlaying,
     getDuration: () => el.duration,
     getCurrentTime: () => el.currentTime,
     setCurrentTime: (time: number) => (el.currentTime = time),

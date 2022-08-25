@@ -108,21 +108,17 @@ export const usePlayerStore = create<stateType>((set, get) => ({
       }));
     },
     syncProgress() {
-      if (!audioController) return;
-      set((state) => ({
-        ...state,
+      if (!audioController || get().playingData.fetchingUrl) return;
+      set({
         progress: audioController?.getCurrentTime(),
         isPlaying: audioController?.getIsPlaying(),
-      }));
+      });
     },
     pause() {
       const { isPlaying } = get();
       if (!audioController || !isPlaying) return;
 
-      set((state) => ({
-        ...state,
-        isPlaying: false,
-      }));
+      set({ isPlaying: false });
       audioController?.pause();
     },
     play(newIdx?: number) {
@@ -149,8 +145,7 @@ export const usePlayerStore = create<stateType>((set, get) => ({
           ? audioController?.setSrc(queue[newIdx]!.url!)
           : audioController?.pause();
 
-        set((state) => ({
-          ...state,
+        set({
           currentTrack: newIdx,
           playingData: {
             id: queue[newIdx]!.id,
@@ -160,7 +155,7 @@ export const usePlayerStore = create<stateType>((set, get) => ({
           loadingState: queue[newIdx]!.url ? "done" : "initialUrl",
           isPlaying: false,
           progress: 0,
-        }));
+        });
       }
 
       if (isFetchingUrl(get().loadingState) && !get().playingData.fetchingUrl) {
@@ -224,10 +219,7 @@ export const usePlayerStore = create<stateType>((set, get) => ({
         play();
       }
       audioController.setCurrentTime(progress);
-      set((state) => ({
-        ...state,
-        progress,
-      }));
+      set({ progress });
     },
     playNext() {
       const {
@@ -258,10 +250,7 @@ export const usePlayerStore = create<stateType>((set, get) => ({
       if (!audioController) return;
       const timeBeforeReset = 10;
       if (currentTrack === 0 || progress > timeBeforeReset) {
-        set((state) => ({
-          ...state,
-          progress: 0,
-        }));
+        set({ progress: 0 });
         !isFetchingUrl(loadingState) && audioController.setCurrentTime(0);
         play();
         return;
@@ -271,10 +260,7 @@ export const usePlayerStore = create<stateType>((set, get) => ({
     setVolume(newVolume: number) {
       if (!audioController) return;
       if (newVolume > 1 || newVolume < 0) return;
-      set((state) => ({
-        ...state,
-        volume: newVolume,
-      }));
+      set({ volume: newVolume });
       audioController.setVolume(newVolume);
     },
     pushTrack(track: TrackType) {
@@ -284,10 +270,7 @@ export const usePlayerStore = create<stateType>((set, get) => ({
       } = get();
       if (!audioController) return;
       if (queue.some((t) => t.id === track.id)) return;
-      set((state) => ({
-        ...state,
-        queue: [...state.queue, track],
-      }));
+      set({ queue: [...queue, track] });
       play(queue.length - 1);
     },
     reorderQueue(from: number, to: number) {
@@ -318,10 +301,7 @@ export const usePlayerStore = create<stateType>((set, get) => ({
       } = get();
       if (!audioController) return;
       if (new Set(newQueue.map((t) => t.id)).size !== newQueue.length) return; // check if there are no duplicates
-      set((state) => ({
-        ...state,
-        queue: newQueue,
-      }));
+      set({ queue: newQueue });
       play(0);
     },
   },

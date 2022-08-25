@@ -1,6 +1,5 @@
 import {
   Navbar,
-  NavLink,
   NavLinkProps,
   Popover,
   Space,
@@ -10,6 +9,7 @@ import {
 import { useSession } from "next-auth/react";
 import React from "react";
 import { Books, Heart, History, Home, Search } from "tabler-icons-react";
+import { NavLink } from "./NavLink";
 
 export type Page =
   | "home"
@@ -37,54 +37,42 @@ export const Nav: React.FC<Props> = ({ currentTab }) => {
           <NavLink
             label="Home"
             icon={<Home />}
-            {...(currentTab === "home" ? activeProps : {})}
+            active={currentTab === "home"}
+            link="/"
           />
+
           <NavLink
             label="Search"
             icon={<Search />}
-            {...(currentTab === "search" ? activeProps : {})}
+            active={currentTab === "search"}
+            link="/explore"
           />
-          <Popover width={200} position="bottom" withArrow shadow="md">
-            <Popover.Target>
-              <NavLink
-                label="My Library"
-                icon={<Books />}
-                {...(currentTab === "my-library" ? activeProps : {})}
-              />
-            </Popover.Target>
-            <Popover.Dropdown>
-              <Text size="sm">You need to be signed in to view this page</Text>
-            </Popover.Dropdown>
-          </Popover>
+          <NavLink
+            label="My Library"
+            icon={<Books />}
+            active={currentTab === "my-library"}
+            link="/library"
+            requiresAuth
+          />
         </Stack>
       </Navbar.Section>
       <Space h="xl" />
 
       <Navbar.Section>
-        <Popover width={200} position="bottom" withArrow shadow="md">
-          <Popover.Target>
-            <NavLink
-              label="Liked Songs"
-              icon={<Heart />}
-              {...(currentTab === "liked" ? activeProps : {})}
-            />
-          </Popover.Target>
-          <Popover.Dropdown>
-            <Text size="sm">You need to be signed in to view this page</Text>
-          </Popover.Dropdown>
-        </Popover>
-        <Popover width={200} position="bottom" withArrow shadow="md">
-          <Popover.Target>
-            <NavLink
-              label="Recently Played"
-              icon={<History />}
-              {...(currentTab === "recent" ? activeProps : {})}
-            />
-          </Popover.Target>
-          <Popover.Dropdown>
-            <Text size="sm">You need to be signed in to view this page</Text>
-          </Popover.Dropdown>
-        </Popover>
+        <NavLink
+          label="Liked Songs"
+          icon={<Heart />}
+          active={currentTab === "liked"}
+          link="/liked"
+          requiresAuth
+        />
+        <NavLink
+          label="Recently Played"
+          icon={<History />}
+          active={currentTab === "recent"}
+          link="/recent"
+          requiresAuth
+        />
       </Navbar.Section>
     </Navbar>
   );

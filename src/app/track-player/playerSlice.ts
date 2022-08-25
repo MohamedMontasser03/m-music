@@ -173,7 +173,8 @@ export const usePlayerStore = create<stateType>((set, get) => ({
         }));
         getAudioUrl(queue[newIdx ?? currentTrack]!.id)
           .then(({ url, id }) => {
-            if (id !== get().playingData.id) return;
+            if (id !== get().playingData.id || !get().playingData.fetchingUrl)
+              return;
             set((state) => ({
               ...state,
               queue: setUrl(state.queue, newIdx ?? currentTrack, url),

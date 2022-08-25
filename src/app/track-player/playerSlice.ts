@@ -14,6 +14,7 @@ export type TrackType = {
     height: number;
   }[];
   duration: number;
+  url?: string;
 };
 
 type stateType = {
@@ -65,6 +66,7 @@ export const usePlayerStore = create<stateType>((set, get) => ({
       if (!audioController) return;
       const {
         loadingState: prevState,
+        playingData: { fetchingUrl },
         actions: { pause, play },
       } = get();
       let loadingState = prevState;
@@ -74,7 +76,7 @@ export const usePlayerStore = create<stateType>((set, get) => ({
         loadingState = audioController?.getIsLoading() ? "loadingData" : "done";
       }
 
-      if (isFetchingUrl(loadingState)) {
+      if (isFetchingUrl(loadingState) && !fetchingUrl) {
         loadingState = loadingState === "initialUrl" ? "errorUrl" : "errorFail";
       }
 
@@ -143,17 +145,19 @@ export const usePlayerStore = create<stateType>((set, get) => ({
 
       if (newIdx !== undefined && playingData.id !== queue[newIdx]?.id) {
         audioController.clearErrors();
-        audioController?.pause();
+        queue[newIdx]!.url
+          ? audioController?.setSrc(queue[newIdx]!.url!)
+          : audioController?.pause();
 
         set((state) => ({
           ...state,
-          currentTrack: newIdx ?? state.currentTrack,
+          currentTrack: newIdx,
           playingData: {
-            id: queue[newIdx ?? state.currentTrack]!.id,
+            id: queue[newIdx]!.id,
             fetchingUrl: false,
-            url: "",
+            url: queue[newIdx]!.url ?? "",
           },
-          loadingState: "initialUrl",
+          loadingState: queue[newIdx]!.url ? "done" : "initialUrl",
           isPlaying: false,
           progress: 0,
         }));
@@ -172,6 +176,7 @@ export const usePlayerStore = create<stateType>((set, get) => ({
             if (id !== get().playingData.id) return;
             set((state) => ({
               ...state,
+              queue: setUrl(state.queue, newIdx ?? currentTrack, url),
               playingData: {
                 id: state.playingData.id,
                 fetchingUrl: false,
@@ -200,10 +205,7 @@ export const usePlayerStore = create<stateType>((set, get) => ({
         return;
       }
 
-      set((state) => ({
-        ...state,
-        isPlaying: true,
-      }));
+      set({ isPlaying: true });
       audioController?.play();
     },
     setProgress(progress: number, end?: boolean) {
@@ -250,6 +252,7 @@ export const usePlayerStore = create<stateType>((set, get) => ({
         currentTrack,
         actions: { play },
         progress,
+        loadingState,
       } = get();
       if (!audioController) return;
       const timeBeforeReset = 10;
@@ -258,7 +261,7 @@ export const usePlayerStore = create<stateType>((set, get) => ({
           ...state,
           progress: 0,
         }));
-        audioController.setCurrentTime(0);
+        !isFetchingUrl(loadingState) && audioController.setCurrentTime(0);
         play();
         return;
       }
@@ -327,6 +330,12 @@ const getAudioUrl = async (id: string) => {
   const query = await client.query("playback.audio", { id });
   if (!query.url) throw new Error("No url found");
   return { url: query.url, id };
+};
+
+const setUrl = (queue: TrackType[], idx: number, url?: string) => {
+  const newQueue = [...queue];
+  newQueue[idx] = { ...newQueue[idx], url } as TrackType;
+  return newQueue;
 };
 
 export const isFetchingUrl = (loadingState: stateType["loadingState"]) => {

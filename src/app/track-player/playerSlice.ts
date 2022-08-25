@@ -68,12 +68,7 @@ export const usePlayerStore = create<stateType>((set, get) => ({
         actions: { pause, play },
       } = get();
       let loadingState = prevState;
-
-      if (audioController?.getError()) {
-        // if the player hasn't failed then refetch the url to make sure the error isn't because of a bad url
-        // but if it has failed then don't refetch the url
-        loadingState = loadingState !== "errorFail" ? "errorFail" : "errorUrl";
-      }
+      const errArray = audioController?.getErrors();
 
       if (["done", "loadingData"].includes(loadingState)) {
         loadingState = audioController?.getIsLoading() ? "loadingData" : "done";
@@ -81,6 +76,11 @@ export const usePlayerStore = create<stateType>((set, get) => ({
 
       if (isFetchingUrl(loadingState)) {
         loadingState = loadingState === "initialUrl" ? "errorUrl" : "errorFail";
+      }
+
+      if (errArray.length) {
+        loadingState = errArray.length > 1 ? "errorFail" : "errorUrl";
+        set({ loadingState });
       }
 
       loadingState === "errorUrl" && play();
@@ -142,6 +142,7 @@ export const usePlayerStore = create<stateType>((set, get) => ({
       if (newIdx === undefined && playingData.fetchingUrl) return;
 
       if (newIdx !== undefined && playingData.id !== queue[newIdx]?.id) {
+        audioController.clearErrors();
         audioController?.pause();
 
         set((state) => ({

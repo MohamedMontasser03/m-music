@@ -11,12 +11,14 @@ type AudioController = {
   readonly setCurrentTime: (time: number) => number;
   readonly setVolume: (volume: number) => number;
   readonly getIsLoading: () => boolean;
-  readonly getError: () => MediaError | null;
+  readonly getErrors: () => MediaError[];
+  readonly clearErrors: () => void;
 };
 
 export const audioController: AudioController | undefined = (() => {
   if (typeof window === "undefined") return undefined;
   const el = new Audio();
+  let errArray = [] as MediaError[];
 
   el.addEventListener("timeupdate", () => {
     usePlayerStore.getState().actions.syncProgress();
@@ -35,6 +37,7 @@ export const audioController: AudioController | undefined = (() => {
     usePlayerStore.getState().actions.syncLoadingState();
   });
   el.addEventListener("loadeddata", () => {
+    errArray = [];
     usePlayerStore.getState().actions.syncLoadingState();
   });
   el.addEventListener("waiting", () => {
@@ -44,6 +47,7 @@ export const audioController: AudioController | undefined = (() => {
     usePlayerStore.getState().actions.syncLoadingState();
   });
   el.addEventListener("error", () => {
+    errArray.push(el.error!);
     usePlayerStore.getState().actions.syncLoadingState();
   });
 
@@ -64,6 +68,7 @@ export const audioController: AudioController | undefined = (() => {
     setCurrentTime: (time: number) => (el.currentTime = time),
     setVolume: (volume: number) => (el.volume = volume),
     getIsLoading: () => el.readyState <= el.HAVE_CURRENT_DATA,
-    getError: () => el.error,
+    getErrors: () => errArray,
+    clearErrors: () => (errArray = []),
   } as AudioController;
 })();

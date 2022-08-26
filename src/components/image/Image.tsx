@@ -20,7 +20,6 @@ export const Image: React.FC<Props> = ({
 }) => {
   const imageRef = useRef<HTMLImageElement>(null);
   const [loaded, setLoaded] = useState(false);
-  if (!loaded && imageRef.current?.complete) setLoaded(true);
 
   const onLoad = (): void => {
     setLoaded(true);
@@ -42,7 +41,10 @@ export const Image: React.FC<Props> = ({
         height={height}
         onLoad={onLoad}
         onError={onError}
-        imageRef={imageRef}
+        imageRef={(el) => {
+          el?.naturalHeight && setLoaded(true);
+          return imageRef;
+        }}
         sx={!loaded ? { position: "absolute", opacity: 0 } : {}}
       />
       {!loaded && (

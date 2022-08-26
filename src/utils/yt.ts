@@ -55,7 +55,14 @@ export const commonYTBody = {
   },
 } as const;
 
-export type RecommendationReturnType = {
+export type GenreList = {
+  type: "genre";
+  title: string;
+  color: string;
+  id: string;
+};
+
+export type HomeReturnType = {
   continuation?: string;
   trackingParam?: string;
   sections: {
@@ -74,10 +81,37 @@ export type RecommendationReturnType = {
     }[];
   }[];
 };
+export type ExploreReturnType = {
+  continuation?: string;
+  trackingParam?: string;
+  sections: {
+    title: string;
+    items: (
+      | {
+          type: "track" | "playlist";
+          title: string;
+          id: string;
+          authorName: string;
+          authorId?: string;
+          thumbnails: {
+            url: string;
+            width: number;
+            height: number;
+          }[];
+        }
+      | GenreList
+    )[];
+  }[];
+};
 
-export function formatRecommendationResults(
+export type RecommendationReturnType<T extends "home" | "explore" = "home"> =
+  T extends "home" ? HomeReturnType : ExploreReturnType;
+
+export function formatRecommendationResults<
+  T extends "home" | "explore" = "home"
+>(
   rec: any // Youtube's Api response is so big that it's not worth creating a type for it
-): RecommendationReturnType {
+): RecommendationReturnType<T> {
   const base =
     rec.contents?.singleColumnBrowseResultsRenderer?.tabs?.[0]?.tabRenderer
       ?.content?.sectionListRenderer ||
@@ -151,6 +185,15 @@ function formatMusicList(musicList: any) {
       thumbnails:
         track.musicTwoRowItemRenderer.thumbnailRenderer.musicThumbnailRenderer
           .thumbnail.thumbnails,
+    }));
+  }
+  if (musicList?.[0].musicNavigationButtonRenderer) {
+    return musicList.map((track: any) => ({
+      type: "genre",
+      title: track.musicNavigationButtonRenderer.buttonText.runs[0].text,
+      color: track.musicNavigationButtonRenderer.solid.leftStripeColor,
+      id: track.musicNavigationButtonRenderer.clickCommand.browseEndpoint
+        .params,
     }));
   }
   return [];

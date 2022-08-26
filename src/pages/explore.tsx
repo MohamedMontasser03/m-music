@@ -1,20 +1,48 @@
-import { Group, Loader, Space, Text } from "@mantine/core";
+import { Center, Grid, Group, Loader, Space, Text, Title } from "@mantine/core";
 import type { NextPage } from "next";
+import Link from "next/link";
 import { TileList } from "../components/tile/TileList";
 import MainLayout from "../layouts";
 import { trpc } from "../utils/trpc";
+import type { GenreList, HomeReturnType } from "../utils/yt";
 
 const Home: NextPage = () => {
   const { data, isLoading } = trpc.useQuery(["recommendation.explore"]);
   const genres = data?.sections.find(
     (section) => section.title === "Moods and genres"
-  );
+  ) as { title: string; items: GenreList[] };
   const trackLists = data?.sections.filter(
     (section) => section.title !== "Moods and genres"
-  );
+  ) as HomeReturnType["sections"];
 
   return (
     <MainLayout title="Explore" activePage="search">
+      <Title pl="md" pt="md">
+        {genres?.title}
+      </Title>
+      <Group p="lg" spacing="sm">
+        {genres?.items?.map((genre: GenreList) => (
+          <Link key={genre.id} href={`/genre/${genre.id}`}>
+            <a>
+              <Center
+                sx={{
+                  width: 150,
+                  height: 150,
+                  borderRadius: 10,
+                  backgroundColor: "orange",
+                }}
+                p="lg"
+                key={genre.title}
+              >
+                <Text weight="400" color="white" size={20} align="center">
+                  {genre.title}
+                </Text>
+              </Center>
+            </a>
+          </Link>
+        ))}
+      </Group>
+      <Space h="lg" />
       <div>
         {trackLists?.map((item) => (
           <TileList key={item.title} section={item} />

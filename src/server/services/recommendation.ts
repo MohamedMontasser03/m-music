@@ -56,7 +56,7 @@ export async function getExploreResult() {
         credentials: "include",
       }
     );
-    return formatRecommendationResults(await res.json());
+    return formatRecommendationResults<"explore">(await res.json());
   } catch (err) {
     console.error("An error occurred while fetching video data", err);
   }

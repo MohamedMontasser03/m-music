@@ -14,8 +14,8 @@ const Home: NextPage = () => {
   } = trpc.useInfiniteQuery(["recommendation", {}], {
     getNextPageParam: (prevPage) => {
       return {
-        continuation: prevPage?.key?.continuation,
-        trackingParam: prevPage?.key?.trackingParam,
+        continuation: prevPage?.continuation,
+        trackingParam: prevPage?.trackingParam,
       };
     },
     staleTime: Infinity,
@@ -26,7 +26,7 @@ const Home: NextPage = () => {
   useEffect(() => {
     if (
       entry?.isIntersecting &&
-      recData?.pages[recData?.pages.length - 1]?.key?.continuation &&
+      recData?.pages[recData?.pages.length - 1]?.continuation &&
       !isLoading
     ) {
       fetchNextPage();
@@ -42,14 +42,14 @@ const Home: NextPage = () => {
       </Text>
       <div>
         {recData?.pages.map((item) =>
-          item.key?.sections?.map((section, idx) => (
+          item?.sections?.map((section, idx) => (
             <div ref={ref} key={section.title + idx}>
               <TileList section={section} />
             </div>
           ))
         )}
       </div>
-      {(!!recData?.pages[recData?.pages.length - 1]?.key?.continuation ||
+      {(!!recData?.pages[recData?.pages.length - 1]?.continuation ||
         isLoading ||
         !recData) && (
         <Group align="center" position="center" mt="xl">

@@ -1,22 +1,29 @@
 import { createRouter } from "./context";
 import { z } from "zod";
-import { getRecommendation } from "../services/recommendation";
+import {
+  getExploreResult,
+  getRecommendation,
+} from "../services/recommendation";
 
-export const recommendationRouter = createRouter().query("", {
-  input: z.object({
-    cursor: z
-      .object({
-        continuation: z.string(),
-        trackingParam: z.string(),
-      })
-      .nullish(),
-  }),
-  async resolve({ input }) {
-    return {
-      key: await getRecommendation({
+export const recommendationRouter = createRouter()
+  .query("", {
+    input: z.object({
+      cursor: z
+        .object({
+          continuation: z.string(),
+          trackingParam: z.string(),
+        })
+        .nullish(),
+    }),
+    resolve({ input }) {
+      return getRecommendation({
         continuation: input?.cursor?.continuation,
         trackingParam: input?.cursor?.trackingParam,
-      }),
-    };
-  },
-});
+      });
+    },
+  })
+  .query(".explore", {
+    resolve() {
+      return getExploreResult();
+    },
+  });

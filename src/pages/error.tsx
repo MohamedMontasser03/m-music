@@ -1,9 +1,8 @@
 import { Text } from "@mantine/core";
-import type { NextPage } from "next";
 import Link from "next/link";
 import MainLayout from "../layouts";
 
-const Home: NextPage = () => {
+export const ErrorPage: React.FC = () => {
   return (
     <MainLayout title="Error" activePage="none">
       <Text weight="700" size={50} align="center">
@@ -23,5 +22,3 @@ const Home: NextPage = () => {
     </MainLayout>
   );
 };
-
-export default Home;

@@ -1,16 +1,9 @@
-import {
-  ActionIcon,
-  Button,
-  Card,
-  Image,
-  Stack,
-  Text,
-  UnstyledButton,
-} from "@mantine/core";
+import { ActionIcon, Card, Stack, Text } from "@mantine/core";
 import React, { useCallback, useMemo } from "react";
 import { trpc } from "../../utils/trpc";
 import { TrackType, usePlayerStore } from "../../app/track-player/playerSlice";
 import { PlayerPlay } from "tabler-icons-react";
+import { Image } from "../image/Image";
 
 type Props = {
   type: "playlist" | "track";
@@ -75,6 +68,7 @@ export const Tile: React.FC<Props> = ({
           height={250}
           width={250}
           alt={title}
+          fallback="https://www.gstatic.com/youtube/media/ytm/images/pbg/attribute-radio-fallback-2@1000.png"
         />
         <ActionIcon
           variant="filled"

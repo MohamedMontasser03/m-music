@@ -1,5 +1,5 @@
 import { Carousel } from "@mantine/carousel";
-import { Card, Group, Image, Stack, Text, Title } from "@mantine/core";
+import { Group, Title } from "@mantine/core";
 import React from "react";
 import { RecommendationReturnType } from "../../utils/yt";
 import { Tile } from "./Tile";

@@ -1,9 +1,10 @@
-import { Dialog, Group, Image, Stack, Text } from "@mantine/core";
+import { Dialog, Group, Stack, Text } from "@mantine/core";
 import React from "react";
 import shallow from "zustand/shallow";
 import { usePlayerStore } from "../../app/track-player/playerSlice";
+import { Image } from "../image/Image";
 import { PlayerControls } from "./PlayerControls";
-import { ProgressControls } from "./progressControls";
+import { ProgressControls } from "./ProgressControls";
 
 export const TrackPlayer: React.FC = () => {
   const {
@@ -27,12 +28,12 @@ export const TrackPlayer: React.FC = () => {
             src={
               [...(queue[idx]?.thumbnails || [])].sort(
                 (a, b) => b.width - a.width
-              )[0]?.url
+              )[0]?.url || ""
             }
             width={150}
             height={150}
-            alt={queue[idx]?.title}
-            withPlaceholder
+            alt={queue[idx]?.title || ""}
+            fallback="https://www.gstatic.com/youtube/media/ytm/images/pbg/attribute-radio-fallback-2@1000.png"
           />
           <Stack
             sx={{

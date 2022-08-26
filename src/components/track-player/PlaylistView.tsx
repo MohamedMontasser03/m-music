@@ -3,13 +3,13 @@ import {
   Button,
   Dialog,
   Group,
-  Image,
   ScrollArea,
   Stack,
   Text,
 } from "@mantine/core";
 import { ArrowsShuffle, Cross, RepeatOff, X } from "tabler-icons-react";
 import { TrackType, usePlayerStore } from "../../app/track-player/playerSlice";
+import { Image } from "../image/Image";
 
 type Props = {
   opened: boolean;
@@ -71,11 +71,11 @@ export const PlaylistView: React.FC<Props> = ({
             >
               <Group noWrap>
                 <Image
-                  src={track.thumbnails[0]?.url}
+                  src={track.thumbnails[0]!.url}
                   width={40}
                   height={40}
                   alt={track.title}
-                  withPlaceholder
+                  fallback="https://www.gstatic.com/youtube/media/ytm/images/pbg/attribute-radio-fallback-2@1000.png"
                 />
                 <Text
                   style={{

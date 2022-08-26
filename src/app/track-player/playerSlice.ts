@@ -352,6 +352,7 @@ export const usePlayerStore = create<stateType>()(
         if (!audioController || !state) return;
         if (state.playingData.url !== "")
           audioController.setSrc(state.playingData.url);
+        audioController.setVolume(state.volume);
       },
     }
   )

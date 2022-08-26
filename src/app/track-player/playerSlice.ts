@@ -341,7 +341,7 @@ export const usePlayerStore = create<stateType>()(
       partialize: (state) =>
         Object.fromEntries(
           Object.entries(state).filter(
-            ([key]) => !["actions", "progress", "isPlaying"].includes(key)
+            ([key]) => !["actions", "isPlaying"].includes(key)
           )
         ),
       onRehydrateStorage: () => (state, error) => {
@@ -350,8 +350,10 @@ export const usePlayerStore = create<stateType>()(
           return;
         }
         if (!audioController || !state) return;
-        if (state.playingData.url !== "")
+        if (state.playingData.url !== "") {
           audioController.setSrc(state.playingData.url);
+          audioController.setCurrentTime(state.progress);
+        }
         audioController.setVolume(state.volume);
       },
     }

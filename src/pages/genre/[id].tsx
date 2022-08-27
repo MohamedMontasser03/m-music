@@ -7,12 +7,14 @@ import { trpc } from "../../utils/trpc";
 
 const Genre: NextPage = () => {
   const { query, push } = useRouter();
-  const {
-    data: result,
-    isLoading,
-    error,
-  } = trpc.useQuery(["recommendation.genre", { id: query.id as string }]);
+  const { data: result, isLoading } = trpc.useQuery([
+    "recommendation.genre",
+    { id: query.id as string },
+  ]);
 
+  if (!result && !isLoading && typeof window !== "undefined") {
+    push("/404");
+  }
   return (
     <MainLayout title="Explore" activePage="search">
       <Text weight="700" size={50} align="center" pt="md">

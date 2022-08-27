@@ -5,6 +5,7 @@ import {
   getGenreResult,
   getRecommendation,
 } from "../services/recommendation";
+import { TRPCError } from "@trpc/server";
 
 export const recommendationRouter = createRouter()
   .query("", {

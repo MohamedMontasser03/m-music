@@ -86,6 +86,6 @@ export async function getGenreResult(params: string) {
       data: formatRecommendationResults(content),
     };
   } catch (err) {
-    console.error("An error occurred while fetching video data", err);
+    console.error("An error occurred while fetching genre video data", err);
   }
 }

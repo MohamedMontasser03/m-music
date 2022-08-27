@@ -6,13 +6,13 @@ import MainLayout from "../layouts";
 import { trpc } from "../utils/trpc";
 import type { GenreList, HomeReturnType } from "../utils/yt";
 
-const Home: NextPage = () => {
+const Explore: NextPage = () => {
   const { data, isLoading } = trpc.useQuery(["recommendation.explore"]);
   const genres = data?.sections.find(
     (section) => section.title === "Moods and genres"
   ) as { title: string; items: GenreList[] };
   const trackLists = data?.sections.filter(
-    (section) => section.title !== "Moods and genres"
+    (section) => section.title !== "Moods and genres" && section.title // make sure it isn't undefined
   ) as HomeReturnType["sections"];
 
   return (
@@ -58,4 +58,4 @@ const Home: NextPage = () => {
   );
 };
 
-export default Home;
+export default Explore;

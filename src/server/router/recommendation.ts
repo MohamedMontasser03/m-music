@@ -2,6 +2,7 @@ import { createRouter } from "./context";
 import { z } from "zod";
 import {
   getExploreResult,
+  getGenreResult,
   getRecommendation,
 } from "../services/recommendation";
 
@@ -25,5 +26,13 @@ export const recommendationRouter = createRouter()
   .query(".explore", {
     resolve() {
       return getExploreResult();
+    },
+  })
+  .query(".genre", {
+    input: z.object({
+      id: z.string(),
+    }),
+    resolve({ input }) {
+      return getGenreResult(input.id);
     },
   });

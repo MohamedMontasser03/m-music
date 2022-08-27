@@ -124,12 +124,19 @@ export function formatRecommendationResults<
     base?.continuations?.[0].nextContinuationData?.clickTrackingParams;
   return {
     sections: base.contents
-      .filter((section: any) => section.musicCarouselShelfRenderer)
+      .filter(
+        (section: any) =>
+          section.musicCarouselShelfRenderer || section.gridRenderer
+      )
       .map((section: any) => ({
         title:
-          section.musicCarouselShelfRenderer.header
-            .musicCarouselShelfBasicHeaderRenderer.title.runs[0].text,
-        items: formatMusicList(section.musicCarouselShelfRenderer.contents),
+          section.musicCarouselShelfRenderer?.header
+            ?.musicCarouselShelfBasicHeaderRenderer?.title?.runs[0].text ??
+          section.gridRenderer?.header?.gridHeaderRenderer?.title?.runs[0].text,
+        items: formatMusicList(
+          section.musicCarouselShelfRenderer?.contents ??
+            section.gridRenderer?.items
+        ),
       })),
     continuation,
     trackingParam,
@@ -191,7 +198,7 @@ function formatMusicList(musicList: any) {
     return musicList.map((track: any) => ({
       type: "genre",
       title: track.musicNavigationButtonRenderer.buttonText.runs[0].text,
-      color: track.musicNavigationButtonRenderer.solid.leftStripeColor,
+      color: track.musicNavigationButtonRenderer.solid?.leftStripeColor,
       id: track.musicNavigationButtonRenderer.clickCommand.browseEndpoint
         .params,
     }));

@@ -61,3 +61,31 @@ export async function getExploreResult() {
     console.error("An error occurred while fetching video data", err);
   }
 }
+export async function getGenreResult(params: string) {
+  try {
+    const key = await getPublicYoutubeAppKey();
+    const res = await fetch(
+      `https://music.youtube.com/youtubei/v1/browse?key=${key}&prettyPrint=false`,
+      {
+        headers: ytHeaders,
+        referrer: "https://music.youtube.com/explore",
+        referrerPolicy: "strict-origin-when-cross-origin",
+        body: JSON.stringify({
+          ...commonYTBody,
+          browseId: "FEmusic_moods_and_genres_category",
+          params,
+        }),
+        method: "POST",
+        mode: "cors",
+        credentials: "include",
+      }
+    );
+    const content = await res.json();
+    return {
+      title: content.header.musicHeaderRenderer.title.runs[0].text,
+      data: formatRecommendationResults(content),
+    };
+  } catch (err) {
+    console.error("An error occurred while fetching video data", err);
+  }
+}

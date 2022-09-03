@@ -16,7 +16,7 @@ const Genre: NextPage = () => {
     push("/404");
   }
   return (
-    <MainLayout title="Explore" activePage="search">
+    <MainLayout title={result?.title ?? "..."} activePage="search">
       <Text weight="700" size={50} align="center" pt="md">
         {result?.title}
       </Text>

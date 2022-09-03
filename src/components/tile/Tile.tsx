@@ -26,12 +26,16 @@ export const Tile: React.FC<Props> = ({
 }) => {
   const setQueue = usePlayerStore((state) => state.actions.setQueue);
   const thumb = useMemo(
-    () => thumbnails.sort((a, b) => a.width - b.width)[0],
+    () => thumbnails.sort((b, a) => a.height - b.height)[0],
     [thumbnails]
   );
   const improvedImage = useCallback((imageUrl = "") => {
     if (imageUrl.includes("lh3.googleusercontent.com")) {
-      return imageUrl.replace("w60", "w544").replace("h60", "h544");
+      return imageUrl
+        .replace("w60", "w544")
+        .replace("h60", "h544")
+        .replace("w120", "w544")
+        .replace("h120", "h544");
     }
 
     return imageUrl;
@@ -53,7 +57,6 @@ export const Tile: React.FC<Props> = ({
       enabled: false,
     }
   );
-
   return (
     <Card
       withBorder
@@ -61,6 +64,9 @@ export const Tile: React.FC<Props> = ({
         maxWidth: 250,
         height: 250 + 175,
       }}
+      onClick={() =>
+        console.log(thumbnails.sort((a, b) => a.height - b.height)[0], thumb)
+      }
     >
       <Card.Section sx={{ position: "relative" }}>
         <Image

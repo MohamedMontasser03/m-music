@@ -87,7 +87,7 @@ export const PlayerControls: React.FC = () => {
             </ActionIcon>
           </Skeleton>
           <ActionIcon
-            disabled={idx === queue.length - 1 && loop !== "all"}
+            disabled={idx === queue.length - 1 && loop === "none"}
             variant="outline"
             radius="xl"
             onClick={() => playNext()}

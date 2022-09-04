@@ -1,4 +1,4 @@
-import { ActionIcon, Card, Stack, Text } from "@mantine/core";
+import { ActionIcon, Card, Group, Stack, Text } from "@mantine/core";
 import React, { useCallback, useMemo } from "react";
 import { trpc } from "../../utils/trpc";
 import { TrackType, usePlayerStore } from "../../app/track-player/playerSlice";
@@ -15,14 +15,16 @@ type Props = {
     width: number;
     height: number;
   }[];
+  variant?: "Card" | "row";
 };
 
 export const Tile: React.FC<Props> = ({
   type,
   id,
   title,
-  thumbnails,
   authorName,
+  thumbnails,
+  variant = "Card",
 }) => {
   const setQueue = usePlayerStore((state) => state.actions.setQueue);
   const thumb = useMemo(
@@ -57,6 +59,64 @@ export const Tile: React.FC<Props> = ({
       enabled: false,
     }
   );
+
+  const onPlay = useCallback(
+    () =>
+      refetch().then((res) => {
+        if (typeOfId === "track") {
+          const vid = res.data as TrackType;
+          if (!vid) return;
+          setQueue([
+            {
+              id: vid?.id!,
+              title: vid?.title!,
+              authorName: vid?.authorName!,
+              authorId: vid?.authorId!,
+              duration: vid?.duration!,
+              thumbnails: vid?.thumbnails!,
+            },
+          ]);
+        } else {
+          const playlistInfo = res.data as TrackType[];
+
+          setQueue(
+            playlistInfo.map((vid) => ({
+              id: vid?.id!,
+              title: vid?.title!,
+              authorName: vid?.authorName!,
+              authorId: vid?.authorId!,
+              duration: vid?.duration!,
+              thumbnails: vid?.thumbnails!,
+            }))
+          );
+        }
+      }),
+    [refetch, setQueue, typeOfId]
+  );
+  const Component = variant === "Card" ? CardTile : CardRow;
+  return (
+    <Component
+      authorName={authorName}
+      title={title}
+      onPlay={onPlay}
+      thumbnailUrl={thumb?.url!}
+    />
+  );
+};
+
+type CardProps = {
+  title: string;
+  authorName: string;
+  thumbnailUrl: string;
+  onPlay: () => void;
+};
+
+const CardTile: React.FC<CardProps> = ({
+  title,
+  authorName,
+  thumbnailUrl,
+  onPlay,
+}) => {
   return (
     <Card
       withBorder
@@ -64,13 +124,10 @@ export const Tile: React.FC<Props> = ({
         maxWidth: 250,
         height: 250 + 175,
       }}
-      onClick={() =>
-        console.log(thumbnails.sort((a, b) => a.height - b.height)[0], thumb)
-      }
     >
       <Card.Section sx={{ position: "relative" }}>
         <Image
-          src={improvedImage(thumb?.url)}
+          src={thumbnailUrl}
           height={250}
           width={250}
           alt={title}
@@ -81,37 +138,7 @@ export const Tile: React.FC<Props> = ({
           color="red"
           radius="xl"
           p={4}
-          onClick={() =>
-            refetch().then((res) => {
-              if (typeOfId === "track") {
-                const vid = res.data as TrackType;
-                if (!vid) return;
-                setQueue([
-                  {
-                    id: vid?.id!,
-                    title: vid?.title!,
-                    authorName: vid?.authorName!,
-                    authorId: vid?.authorId!,
-                    duration: vid?.duration!,
-                    thumbnails: vid?.thumbnails!,
-                  },
-                ]);
-              } else {
-                const playlistInfo = res.data as TrackType[];
-
-                setQueue(
-                  playlistInfo.map((vid) => ({
-                    id: vid?.id!,
-                    title: vid?.title!,
-                    authorName: vid?.authorName!,
-                    authorId: vid?.authorId!,
-                    duration: vid?.duration!,
-                    thumbnails: vid?.thumbnails!,
-                  }))
-                );
-              }
-            })
-          }
+          onClick={onPlay}
           sx={{
             position: "absolute",
             bottom: 10,
@@ -128,5 +155,49 @@ export const Tile: React.FC<Props> = ({
         </Text>
       </Stack>
     </Card>
+  );
+};
+
+const CardRow: React.FC<CardProps> = ({
+  title,
+  authorName,
+  thumbnailUrl,
+  onPlay,
+}) => {
+  return (
+    <Group
+      sx={(theme) => ({
+        background: theme?.colors?.dark?.[7],
+      })}
+      py="sm"
+      px="lg"
+      position="apart"
+    >
+      <Group>
+        <Image
+          src={thumbnailUrl}
+          height={80}
+          width={80}
+          alt={title}
+          fallback="https://www.gstatic.com/youtube/media/ytm/images/pbg/attribute-radio-fallback-2@1000.png"
+        />
+        <Stack spacing="xs" py="lg">
+          <Text lineClamp={1}>{title}</Text>
+          <Text color="dimmed" lineClamp={1}>
+            {authorName}
+          </Text>
+        </Stack>
+      </Group>
+      <ActionIcon
+        variant="filled"
+        color="red"
+        radius="xl"
+        p={6}
+        size="lg"
+        onClick={onPlay}
+      >
+        <PlayerPlay size={35} />
+      </ActionIcon>
+    </Group>
   );
 };

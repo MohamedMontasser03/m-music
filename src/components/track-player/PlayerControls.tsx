@@ -25,6 +25,7 @@ export const PlayerControls: React.FC = () => {
     queue,
     idx,
     isPlaying,
+    { loop },
   ] = usePlayerStore(
     (state) => [
       state.loadingState,
@@ -33,6 +34,7 @@ export const PlayerControls: React.FC = () => {
       state.queue,
       state.currentTrack,
       state.isPlaying,
+      state.playerOptions,
     ],
     shallow
   );
@@ -85,7 +87,7 @@ export const PlayerControls: React.FC = () => {
             </ActionIcon>
           </Skeleton>
           <ActionIcon
-            disabled={idx === queue.length - 1}
+            disabled={idx === queue.length - 1 && loop !== "all"}
             variant="outline"
             radius="xl"
             onClick={() => playNext()}

@@ -35,6 +35,10 @@ type stateType = {
     fetchingUrl: boolean;
     url: string;
   };
+  playerOptions: {
+    loop: "none" | "one" | "all";
+    shuffle: boolean;
+  };
   actions: {
     pause: () => void;
     play: (newIdx?: number) => void;
@@ -47,6 +51,7 @@ type stateType = {
     pushTrack: (track: TrackType) => void;
     reorderQueue: (from: number, to: number) => void;
     setQueue: (newQueue: TrackType[]) => void;
+    toggleLoop: () => void;
   };
 };
 
@@ -64,6 +69,10 @@ export const usePlayerStore = create<stateType>()(
           url: "",
           fetchingUrl: false,
           id: "",
+        },
+        playerOptions: {
+          loop: "none",
+          shuffle: false,
         },
         actions: {
           syncLoadingState() {
@@ -245,11 +254,11 @@ export const usePlayerStore = create<stateType>()(
             const {
               currentTrack,
               queue,
+              playerOptions: { loop },
               actions: { pause, play },
-              progress,
             } = get();
             if (!audioController) return;
-            if (currentTrack === queue.length - 1) {
+            if (currentTrack === queue.length - 1 && loop === "none") {
               pause();
               set((state) => ({
                 ...state,
@@ -258,8 +267,15 @@ export const usePlayerStore = create<stateType>()(
               }));
               return;
             }
-
-            play(currentTrack + 1);
+            if (loop === "one") {
+              play(currentTrack);
+              return;
+            }
+            play(
+              loop === "none"
+                ? currentTrack + 1
+                : (currentTrack + 1) % queue.length
+            );
           },
           playPrev() {
             const {
@@ -267,16 +283,28 @@ export const usePlayerStore = create<stateType>()(
               actions: { play },
               progress,
               loadingState,
+              playerOptions: { loop },
+              queue,
             } = get();
             if (!audioController) return;
             const timeBeforeReset = 10;
-            if (currentTrack === 0 || progress > timeBeforeReset) {
+            if (
+              (currentTrack === 0 && loop !== "all") ||
+              progress > timeBeforeReset ||
+              loop === "one"
+            ) {
               set({ progress: 0 });
               !isFetchingUrl(loadingState) && audioController.setCurrentTime(0);
               play();
               return;
             }
-            play(currentTrack - 1);
+
+            const prevTrack =
+              loop === "none"
+                ? currentTrack - 1
+                : (((currentTrack - 1) % queue.length) + queue.length) %
+                  queue.length;
+            play(prevTrack);
           },
           setVolume(newVolume: number) {
             if (!audioController) return;
@@ -332,6 +360,17 @@ export const usePlayerStore = create<stateType>()(
               return; // check if there are no duplicates
             set({ queue: newQueue });
             play(0);
+          },
+          toggleLoop() {
+            const {
+              playerOptions: { loop, ...rest },
+            } = get();
+            set({
+              playerOptions: {
+                ...rest,
+                loop: loop === "none" ? "all" : loop === "all" ? "one" : "none",
+              },
+            });
           },
         },
       } as stateType),

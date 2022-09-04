@@ -7,7 +7,15 @@ import {
   Stack,
   Text,
 } from "@mantine/core";
-import { ArrowsShuffle, Cross, RepeatOff, X } from "tabler-icons-react";
+import {
+  ArrowsShuffle,
+  Cross,
+  Repeat,
+  RepeatOff,
+  RepeatOnce,
+  X,
+} from "tabler-icons-react";
+import shallow from "zustand/shallow";
 import { TrackType, usePlayerStore } from "../../app/track-player/playerSlice";
 import { Image } from "../image/Image";
 
@@ -24,7 +32,10 @@ export const PlaylistView: React.FC<Props> = ({
   currentTrack: idx,
   onClose,
 }) => {
-  const play = usePlayerStore((state) => state.actions.play);
+  const [{ play, toggleLoop }, { loop }] = usePlayerStore(
+    (state) => [state.actions, state.playerOptions],
+    shallow
+  );
 
   return (
     <Dialog
@@ -42,8 +53,14 @@ export const PlaylistView: React.FC<Props> = ({
           <ActionIcon>
             <ArrowsShuffle />
           </ActionIcon>
-          <ActionIcon>
-            <RepeatOff />
+          <ActionIcon onClick={() => toggleLoop()}>
+            {loop === "none" ? (
+              <RepeatOff />
+            ) : loop === "one" ? (
+              <RepeatOnce />
+            ) : (
+              <Repeat />
+            )}
           </ActionIcon>
         </Group>
         <ActionIcon onClick={onClose} name="close">

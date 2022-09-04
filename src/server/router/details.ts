@@ -11,6 +11,7 @@ export const detailsRouter = createRouter()
     }),
     async resolve({ input }): Promise<TrackType> {
       const vidInfo = await ytdl.getBasicInfo(input.id);
+
       return {
         id: vidInfo.videoDetails.videoId,
         title: vidInfo.videoDetails.title,
@@ -18,6 +19,24 @@ export const detailsRouter = createRouter()
         authorName: vidInfo.videoDetails.author.name,
         thumbnails: vidInfo.videoDetails.thumbnails,
         duration: +vidInfo.videoDetails.lengthSeconds,
+      };
+    },
+  })
+  .query(".video.full", {
+    input: z.object({
+      id: z.string(),
+    }),
+    async resolve({ input }): Promise<ytdl.videoInfo & TrackType> {
+      const vidInfo = await ytdl.getBasicInfo(input.id);
+
+      return {
+        id: vidInfo.videoDetails.videoId,
+        title: vidInfo.videoDetails.title,
+        authorId: vidInfo.videoDetails.author.id,
+        authorName: vidInfo.videoDetails.author.name,
+        thumbnails: vidInfo.videoDetails.thumbnails,
+        duration: +vidInfo.videoDetails.lengthSeconds,
+        ...vidInfo,
       };
     },
   })

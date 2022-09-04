@@ -27,6 +27,7 @@ export const detailsRouter = createRouter()
     }),
     async resolve({ input }): Promise<TrackType[]> {
       const playlistInfo = await ytpl(input.id);
+
       return playlistInfo.items.map((item) => ({
         id: item.id,
         title: item.title,
@@ -39,5 +40,31 @@ export const detailsRouter = createRouter()
         }[],
         duration: item.durationSec || 0,
       }));
+    },
+  })
+  .query(".playlist.full", {
+    input: z.object({
+      id: z.string(),
+    }),
+    async resolve({
+      input,
+    }): Promise<Omit<ytpl.Result, "items"> & { items: TrackType[] }> {
+      const playlistInfo = await ytpl(input.id);
+
+      return {
+        ...playlistInfo,
+        items: playlistInfo.items.map((item) => ({
+          id: item.id,
+          title: item.title,
+          authorId: item.author.channelID,
+          authorName: item.author.name,
+          thumbnails: item.thumbnails as {
+            url: string;
+            width: number;
+            height: number;
+          }[],
+          duration: item.durationSec || 0,
+        })),
+      };
     },
   });

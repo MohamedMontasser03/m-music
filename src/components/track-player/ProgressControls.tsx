@@ -5,6 +5,7 @@ import {
 import shallow from "zustand/shallow";
 import { Group, Skeleton, Slider, Text } from "@mantine/core";
 import { useCallback } from "react";
+import { formatTime } from "../../utils/time";
 
 export const ProgressControls: React.FC = () => {
   const [loadingState, progress, setProgress, queue, idx] = usePlayerStore(
@@ -17,16 +18,6 @@ export const ProgressControls: React.FC = () => {
     ],
     shallow
   );
-
-  const formatTime = useCallback((time: number, max?: number) => {
-    const includeHours = (max ?? 0) / 3600 > 1 || (time ?? 0) / 3600 > 1;
-    const hours = Math.floor(time / 3600);
-    const minutes = Math.floor(time / 60) % 60;
-    const seconds = Math.floor(time % 60);
-    return `${
-      includeHours ? `${hours}:${minutes < 10 ? "0" : ""}` : ""
-    }${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
-  }, []);
 
   return (
     <Group

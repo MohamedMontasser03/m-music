@@ -47,7 +47,7 @@ export const audioController: AudioController | undefined = (() => {
     usePlayerStore.getState().actions.syncLoadingState();
   });
   el.addEventListener("error", () => {
-    if (el.error?.message !== "") {
+    if (el.error?.message !== "" || el.error?.code === 4) {
       errArray.push(el.error!);
       usePlayerStore.getState().actions.syncLoadingState();
     }

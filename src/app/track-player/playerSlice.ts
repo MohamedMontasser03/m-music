@@ -52,6 +52,7 @@ type stateType = {
     reorderQueue: (from: number, to: number) => void;
     setQueue: (newQueue: TrackType[]) => void;
     toggleLoop: () => void;
+    queNext: (track: TrackType) => void;
   };
 };
 
@@ -371,6 +372,19 @@ export const usePlayerStore = create<stateType>()(
                 loop: loop === "none" ? "all" : loop === "all" ? "one" : "none",
               },
             });
+          },
+          queNext(track: TrackType) {
+            const { queue, currentTrack } = get();
+            if (!audioController) return;
+            if (queue.some((t) => t.id === track.id)) return;
+            set((state) => ({
+              ...state,
+              queue: [
+                ...state.queue.slice(0, currentTrack + 1),
+                track,
+                ...state.queue.slice(currentTrack + 1),
+              ],
+            }));
           },
         },
       } as stateType),

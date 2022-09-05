@@ -1,9 +1,27 @@
-import { ActionIcon, Card, Group, Stack, Text } from "@mantine/core";
-import React, { useCallback, useMemo } from "react";
+import {
+  ActionIcon,
+  Button,
+  Card,
+  Group,
+  Menu,
+  Stack,
+  Text,
+} from "@mantine/core";
+import React, {
+  forwardRef,
+  MouseEvent,
+  PropsWithoutRef,
+  PropsWithRef,
+  useCallback,
+  useMemo,
+  useState,
+} from "react";
 import { trpc } from "../../utils/trpc";
 import { TrackType, usePlayerStore } from "../../app/track-player/playerSlice";
 import { PlayerPlay } from "tabler-icons-react";
 import { Image } from "../image/Image";
+import Router from "next/router";
+import { useMenuState, ControlledMenu, MenuItem } from "@szhsin/react-menu";
 
 type Props = {
   type: "playlist" | "track";
@@ -16,6 +34,7 @@ type Props = {
     height: number;
   }[];
   variant?: "Card" | "row";
+  authorId?: string;
 };
 
 export const Tile: React.FC<Props> = ({
@@ -23,10 +42,13 @@ export const Tile: React.FC<Props> = ({
   id,
   title,
   authorName,
+  authorId,
   thumbnails,
   variant = "Card",
 }) => {
-  const setQueue = usePlayerStore((state) => state.actions.setQueue);
+  const { setQueue, pushTrack, queNext } = usePlayerStore(
+    (state) => state.actions
+  );
   const thumb = useMemo(
     () => thumbnails.sort((b, a) => a.height - b.height)[0],
     [thumbnails]
@@ -47,6 +69,9 @@ export const Tile: React.FC<Props> = ({
     [id]
   );
 
+  const [menuProps, toggleMenu] = useMenuState();
+  const [anchorPoint, setAnchorPoint] = useState({ x: 0, y: 0 });
+
   const { refetch } = trpc.useQuery(
     [
       `details.${typeOfId === "playlist" ? "playlist" : "video"}`,
@@ -59,6 +84,12 @@ export const Tile: React.FC<Props> = ({
       enabled: false,
     }
   );
+
+  const onContextMenu = (e: MouseEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setAnchorPoint({ x: e.clientX, y: e.clientY });
+    toggleMenu(true);
+  };
 
   const onPlay = useCallback(
     () =>
@@ -93,14 +124,73 @@ export const Tile: React.FC<Props> = ({
       }),
     [refetch, setQueue, typeOfId]
   );
+
   const Component = variant === "Card" ? CardTile : CardRow;
   return (
-    <Component
-      authorName={authorName}
-      title={title}
-      onPlay={onPlay}
-      thumbnailUrl={thumb?.url!}
-    />
+    <>
+      <Component
+        authorName={authorName}
+        title={title}
+        onPlay={onPlay}
+        thumbnailUrl={improvedImage(thumb?.url!)}
+        onContextMenu={onContextMenu}
+      />
+      <ControlledMenu
+        {...menuProps}
+        anchorPoint={anchorPoint}
+        onClose={() => toggleMenu(false)}
+        menuStyle={{
+          padding: 0,
+          zIndex: 1000,
+        }}
+      >
+        <Stack
+          sx={(theme) => ({
+            backgroundColor: theme.colors?.dark?.[7],
+            borderRadius: theme.radius.md,
+          })}
+          p="sm"
+        >
+          <Button variant="subtle" onClick={onPlay}>
+            Play
+          </Button>
+          {typeOfId === "track" && (
+            <>
+              <Button
+                variant="subtle"
+                onClick={() =>
+                  refetch().then((track) => pushTrack(track.data as TrackType))
+                }
+              >
+                Add to queue
+              </Button>
+              <Button
+                variant="subtle"
+                onClick={() =>
+                  refetch().then((track) => queNext(track.data as TrackType))
+                }
+              >
+                Que next
+              </Button>
+            </>
+          )}
+          <Button
+            variant="subtle"
+            onClick={() => Router.push(`/${typeOfId}/${id}`)}
+          >
+            Go to page
+          </Button>
+          {authorId && (
+            <Button
+              variant="subtle"
+              onClick={() => Router.push(`/artist/${authorId}`)}
+            >
+              Go to artist
+            </Button>
+          )}
+        </Stack>
+      </ControlledMenu>
+    </>
   );
 };
 
@@ -109,6 +199,7 @@ type CardProps = {
   authorName: string;
   thumbnailUrl: string;
   onPlay: () => void;
+  onContextMenu?: React.MouseEventHandler<HTMLDivElement>;
 };
 
 const CardTile: React.FC<CardProps> = ({
@@ -116,6 +207,7 @@ const CardTile: React.FC<CardProps> = ({
   authorName,
   thumbnailUrl,
   onPlay,
+  onContextMenu,
 }) => {
   return (
     <Card
@@ -124,6 +216,7 @@ const CardTile: React.FC<CardProps> = ({
         maxWidth: 250,
         height: 250 + 175,
       }}
+      onContextMenu={onContextMenu}
     >
       <Card.Section sx={{ position: "relative" }}>
         <Image
@@ -163,6 +256,7 @@ const CardRow: React.FC<CardProps> = ({
   authorName,
   thumbnailUrl,
   onPlay,
+  onContextMenu,
 }) => {
   return (
     <Group
@@ -172,6 +266,7 @@ const CardRow: React.FC<CardProps> = ({
       py="sm"
       px="lg"
       position="apart"
+      onContextMenu={onContextMenu}
     >
       <Group>
         <Image

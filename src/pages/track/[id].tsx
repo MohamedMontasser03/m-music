@@ -25,7 +25,7 @@ const Track: NextPage = () => {
   }
 
   return (
-    <MainLayout title={result?.title ?? "..."} activePage="search">
+    <MainLayout title={result?.title ?? "..."}>
       {!isLoading && result ? (
         <Stack>
           <Group p="lg" align="end" position="apart">

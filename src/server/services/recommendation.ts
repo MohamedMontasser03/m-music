@@ -1,6 +1,7 @@
 import {
   commonYTBody,
   formatRecommendationResults,
+  formatSearchResults,
   getPublicYoutubeAppKey,
   RecommendationReturnType,
   ytHeaders,
@@ -61,6 +62,7 @@ export async function getExploreResult() {
     console.error("An error occurred while fetching video data", err);
   }
 }
+
 export async function getGenreResult(params: string) {
   try {
     const key = await getPublicYoutubeAppKey();
@@ -87,5 +89,61 @@ export async function getGenreResult(params: string) {
     };
   } catch (err) {
     console.error("An error occurred while fetching genre video data", err);
+  }
+}
+
+export async function getSearchSuggestions(input: string) {
+  try {
+    const key = await getPublicYoutubeAppKey();
+
+    const res = await fetch(
+      `https://music.youtube.com/youtubei/v1/music/get_search_suggestions?key=${key}&prettyPrint=false`,
+      {
+        headers: ytHeaders,
+        body: JSON.stringify({
+          ...commonYTBody,
+          input,
+        }),
+        method: "POST",
+      }
+    );
+    const data = await res.json();
+    return (
+      data?.contents[0]?.searchSuggestionsSectionRenderer?.contents?.map(
+        (item: any) =>
+          item.searchSuggestionRenderer.suggestion.runs
+            .map((i: any) => i.text)
+            .join("")
+      ) ?? []
+    );
+  } catch (err) {
+    console.error("An error occurred while fetching search suggestions", err);
+  }
+}
+
+export async function getSearchResult(query: string) {
+  try {
+    const key = await getPublicYoutubeAppKey();
+    const res = await fetch(
+      `https://music.youtube.com/youtubei/v1/search?key=${key}&prettyPrint=false`,
+      {
+        headers: ytHeaders,
+        referrer: "https://music.youtube.com/explore",
+        referrerPolicy: "strict-origin-when-cross-origin",
+        body: JSON.stringify({
+          ...commonYTBody,
+          browseId: "FEmusic_moods_and_genres_category",
+          query,
+          // params: "EgWKAQIIAWoKEAMQBRAKEAkQBA%3D%3D",
+        }),
+        method: "POST",
+        mode: "cors",
+        credentials: "include",
+      }
+    );
+    const content = await res.json();
+    return formatSearchResults(content);
+  } catch (err) {
+    console.error("An error occurred while fetching search results", err);
   }
 }

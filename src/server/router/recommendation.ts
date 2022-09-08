@@ -4,6 +4,8 @@ import {
   getExploreResult,
   getGenreResult,
   getRecommendation,
+  getSearchResult,
+  getSearchSuggestions,
 } from "../services/recommendation";
 import { TRPCError } from "@trpc/server";
 
@@ -35,5 +37,21 @@ export const recommendationRouter = createRouter()
     }),
     resolve({ input }) {
       return getGenreResult(input.id);
+    },
+  })
+  .query(".search", {
+    input: z.object({
+      query: z.string(),
+    }),
+    resolve({ input }) {
+      return getSearchResult(input.query);
+    },
+  })
+  .query(".search.suggestions", {
+    input: z.object({
+      query: z.string(),
+    }),
+    resolve({ input }) {
+      return getSearchSuggestions(input.query);
     },
   });

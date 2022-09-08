@@ -1,6 +1,17 @@
-import { Center, Grid, Group, Loader, Space, Text, Title } from "@mantine/core";
+import {
+  Autocomplete,
+  Center,
+  Grid,
+  Group,
+  Input,
+  Loader,
+  Space,
+  Text,
+  Title,
+} from "@mantine/core";
 import type { NextPage } from "next";
 import Link from "next/link";
+import { SearchBar } from "../components/search-bar/SearchBar";
 import { TileList } from "../components/tile/TileList";
 import MainLayout from "../layouts";
 import { trpc } from "../utils/trpc";
@@ -8,15 +19,18 @@ import type { GenreList, HomeReturnType } from "../utils/yt";
 
 const Explore: NextPage = () => {
   const { data, isLoading } = trpc.useQuery(["recommendation.explore"]);
+
   const genres = data?.sections.find(
     (section) => section.title === "Moods and genres"
   ) as { title: string; items: GenreList[] };
+
   const trackLists = data?.sections.filter(
     (section) => section.title !== "Moods and genres" && section.title // make sure it isn't undefined
   ) as HomeReturnType["sections"];
 
   return (
     <MainLayout title="Explore" activePage="search">
+      <SearchBar />
       <Title pl="md" pt="md">
         {genres?.title}
       </Title>

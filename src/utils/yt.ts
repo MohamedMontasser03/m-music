@@ -55,6 +55,19 @@ export const commonYTBody = {
   },
 } as const;
 
+export type Tile = {
+  type: "track" | "playlist";
+  title: string;
+  id: string;
+  authorName: string;
+  authorId?: string;
+  thumbnails: {
+    url: string;
+    width: number;
+    height: number;
+  }[];
+};
+
 export type GenreList = {
   type: "genre";
   title: string;
@@ -67,18 +80,7 @@ export type HomeReturnType = {
   trackingParam?: string;
   sections: {
     title: string;
-    items: {
-      type: "track" | "playlist";
-      title: string;
-      id: string;
-      authorName: string;
-      authorId?: string;
-      thumbnails: {
-        url: string;
-        width: number;
-        height: number;
-      }[];
-    }[];
+    items: Tile[];
   }[];
 };
 export type ExploreReturnType = {
@@ -86,21 +88,7 @@ export type ExploreReturnType = {
   trackingParam?: string;
   sections: {
     title: string;
-    items: (
-      | {
-          type: "track" | "playlist";
-          title: string;
-          id: string;
-          authorName: string;
-          authorId?: string;
-          thumbnails: {
-            url: string;
-            width: number;
-            height: number;
-          }[];
-        }
-      | GenreList
-    )[];
+    items: (Tile | GenreList)[];
   }[];
 };
 
@@ -143,6 +131,23 @@ export function formatRecommendationResults<
   };
 }
 
+export function formatSearchResults(
+  rec: any // Youtube's Api response is so big that it's not worth creating a type for it
+): {
+  sections: { title: string; items: Tile[] }[];
+} {
+  const base =
+    rec.contents.tabbedSearchResultsRenderer.tabs[0].tabRenderer.content
+      .sectionListRenderer.contents;
+
+  return {
+    sections: base.map((section: any) => ({
+      title: section.musicShelfRenderer?.title?.runs[0].text,
+      items: formatMusicList(section.musicShelfRenderer?.contents),
+    })),
+  };
+}
+
 function formatMusicList(musicList: any) {
   if (musicList?.[0].musicResponsiveListItemRenderer) {
     return musicList.map((track: any) => ({
@@ -152,14 +157,14 @@ function formatMusicList(musicList: any) {
           .musicResponsiveListItemFlexColumnRenderer.text.runs[0].text,
       id: track.musicResponsiveListItemRenderer.flexColumns[0]
         .musicResponsiveListItemFlexColumnRenderer.text.runs[0]
-        .navigationEndpoint.watchEndpoint.videoId,
+        ?.navigationEndpoint?.watchEndpoint.videoId,
       authorName:
         track.musicResponsiveListItemRenderer.flexColumns[1]
           .musicResponsiveListItemFlexColumnRenderer.text.runs[0].text,
       authorId:
         track.musicResponsiveListItemRenderer.flexColumns[1]
           .musicResponsiveListItemFlexColumnRenderer.text.runs[0]
-          .navigationEndpoint?.browseEndpoint?.browseId,
+          ?.navigationEndpoint?.browseEndpoint?.browseId,
       thumbnails:
         track.musicResponsiveListItemRenderer.thumbnail.musicThumbnailRenderer
           .thumbnail.thumbnails,

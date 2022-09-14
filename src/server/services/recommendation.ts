@@ -134,7 +134,6 @@ export async function getSearchResult(query: string) {
           ...commonYTBody,
           browseId: "FEmusic_moods_and_genres_category",
           query,
-          // params: "EgWKAQIIAWoKEAMQBRAKEAkQBA%3D%3D",
         }),
         method: "POST",
         mode: "cors",
@@ -142,7 +141,7 @@ export async function getSearchResult(query: string) {
       }
     );
     const content = await res.json();
-    return formatSearchResults(content);
+    return { content, ...formatSearchResults(content) };
   } catch (err) {
     console.error("An error occurred while fetching search results", err);
   }

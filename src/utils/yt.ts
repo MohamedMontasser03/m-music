@@ -150,21 +150,32 @@ export function formatSearchResults(
 
 function formatMusicList(musicList: any) {
   if (musicList?.[0].musicResponsiveListItemRenderer) {
+    const author = (track: any) =>
+      track.musicResponsiveListItemRenderer.flexColumns[1].musicResponsiveListItemFlexColumnRenderer?.text?.runs.find(
+        (run: any) =>
+          ["MUSIC_PAGE_TYPE_ARTIST", "MUSIC_PAGE_TYPE_USER_CHANNEL"].includes(
+            run.navigationEndpoint?.browseEndpoint
+              ?.browseEndpointContextSupportedConfigs
+              ?.browseEndpointContextMusicConfig.pageType
+          )
+      );
+
     return musicList.map((track: any) => ({
       type: "track",
       title:
         track.musicResponsiveListItemRenderer.flexColumns[0]
           .musicResponsiveListItemFlexColumnRenderer.text.runs[0].text,
-      id: track.musicResponsiveListItemRenderer.flexColumns[0]
-        .musicResponsiveListItemFlexColumnRenderer.text.runs[0]
-        ?.navigationEndpoint?.watchEndpoint.videoId,
-      authorName:
-        track.musicResponsiveListItemRenderer.flexColumns[1]
-          .musicResponsiveListItemFlexColumnRenderer.text.runs[0].text,
-      authorId:
-        track.musicResponsiveListItemRenderer.flexColumns[1]
+      id:
+        track.musicResponsiveListItemRenderer.flexColumns[0]
           .musicResponsiveListItemFlexColumnRenderer.text.runs[0]
-          ?.navigationEndpoint?.browseEndpoint?.browseId,
+          ?.navigationEndpoint?.watchEndpoint.videoId ??
+        track.musicResponsiveListItemRenderer.overlay
+          ?.musicItemThumbnailOverlayRenderer?.content?.musicPlayButtonRenderer
+          ?.playNavigationEndpoint?.watchPlaylistEndpoint?.playlistId ??
+        track.musicResponsiveListItemRenderer.navigationEndpoint?.browseEndpoint
+          .browseId,
+      authorName: author(track)?.text,
+      authorId: author(track)?.navigationEndpoint?.browseEndpoint?.browseId,
       thumbnails:
         track.musicResponsiveListItemRenderer.thumbnail.musicThumbnailRenderer
           .thumbnail.thumbnails,

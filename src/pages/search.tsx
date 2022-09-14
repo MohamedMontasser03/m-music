@@ -27,8 +27,8 @@ const Search: NextPage = () => {
     }
   );
 
-  if (!q) {
-    push("/");
+  if (!q || typeof q !== "string") {
+    push("/explore");
   }
 
   return (

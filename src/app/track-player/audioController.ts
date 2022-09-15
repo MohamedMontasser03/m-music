@@ -60,7 +60,7 @@ export const audioController: AudioController | undefined = (() => {
     el?.readyState > el?.HAVE_CURRENT_DATA;
 
   return {
-    setSrc: (src: string) => (el.src = src),
+    setSrc: (src: string) => (el.src = `/api/audio?url=${src}`),
     getSrc: () => el.src,
     pause: () => getIsPlaying() && el.pause(),
     play: () => !getIsPlaying() && el.play(),

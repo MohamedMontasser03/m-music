@@ -1,4 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
+import { Response } from "node-fetch";
 
 export default function audioProxy(req: NextApiRequest, res: NextApiResponse) {
   const url = Object.entries(req.query).reduce(
@@ -30,7 +31,8 @@ export default function audioProxy(req: NextApiRequest, res: NextApiResponse) {
         res.setHeader(key, value);
       }
 
-      response.body?.pipe(res);
+      // assert response.body is readable stream because we are using node-fetch
+      (response as unknown as Response).body.pipe(res);
     })
     .catch((error) => {
       console.error(error);

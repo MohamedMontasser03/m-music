@@ -30,7 +30,7 @@ export const SearchBar: React.FC<Props> = ({ defaultQuery }) => {
   return (
     <div
       style={{
-        maxWidth: 400,
+        width: 400,
       }}
     >
       <Autocomplete

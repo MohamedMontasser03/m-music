@@ -3,6 +3,7 @@ import {
   Autocomplete,
   Group,
   Loader,
+  Select,
   Space,
   Stack,
 } from "@mantine/core";
@@ -33,7 +34,21 @@ const Search: NextPage = () => {
 
   return (
     <MainLayout title={`Search ${q}`} activePage="search">
-      <SearchBar defaultQuery={q as string} />
+      <Group align="center">
+        <SearchBar defaultQuery={q as string} />
+        {/* <Select
+          label="Source"
+          defaultValue="All"
+          data={[
+            "All",
+            ...(result?.sections
+              .map((s) => s.title)
+              .filter((t) => t !== "Top result") || []),
+            "Youtube",
+          ]}
+        /> */
+        /* TODO: Add source filter */}
+      </Group>
       {!isLoading && result ? (
         <Stack>
           <div>

@@ -141,7 +141,7 @@ export async function getSearchResult(query: string) {
       }
     );
     const content = await res.json();
-    return { content, ...formatSearchResults(content) };
+    return formatSearchResults(content);
   } catch (err) {
     console.error("An error occurred while fetching search results", err);
   }

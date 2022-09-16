@@ -160,22 +160,26 @@ function formatMusicList(musicList: any) {
           )
       );
 
+    const id = (track: any) =>
+      track.musicResponsiveListItemRenderer.flexColumns[0]
+        .musicResponsiveListItemFlexColumnRenderer.text.runs[0]
+        ?.navigationEndpoint?.watchEndpoint.videoId ??
+      track.musicResponsiveListItemRenderer.overlay
+        ?.musicItemThumbnailOverlayRenderer?.content?.musicPlayButtonRenderer
+        ?.playNavigationEndpoint?.watchPlaylistEndpoint?.playlistId ??
+      track.musicResponsiveListItemRenderer.navigationEndpoint?.browseEndpoint
+        .browseId;
     return musicList.map((track: any) => ({
-      type: "track",
+      type: id(track).length >= 24 ? "playlist" : "track",
       title:
         track.musicResponsiveListItemRenderer.flexColumns[0]
           .musicResponsiveListItemFlexColumnRenderer.text.runs[0].text,
-      id:
-        track.musicResponsiveListItemRenderer.flexColumns[0]
-          .musicResponsiveListItemFlexColumnRenderer.text.runs[0]
-          ?.navigationEndpoint?.watchEndpoint.videoId ??
-        track.musicResponsiveListItemRenderer.overlay
-          ?.musicItemThumbnailOverlayRenderer?.content?.musicPlayButtonRenderer
-          ?.playNavigationEndpoint?.watchPlaylistEndpoint?.playlistId ??
+      id: id(track),
+      authorName: author(track)?.text,
+      authorId:
+        author(track)?.navigationEndpoint?.browseEndpoint?.browseId ??
         track.musicResponsiveListItemRenderer.navigationEndpoint?.browseEndpoint
           .browseId,
-      authorName: author(track)?.text,
-      authorId: author(track)?.navigationEndpoint?.browseEndpoint?.browseId,
       thumbnails:
         track.musicResponsiveListItemRenderer.thumbnail.musicThumbnailRenderer
           .thumbnail.thumbnails,

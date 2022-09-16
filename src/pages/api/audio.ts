@@ -1,7 +1,10 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { Response } from "node-fetch";
 
-export default function audioProxy(req: NextApiRequest, res: NextApiResponse) {
+export default async function audioProxy(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
   const url = Object.entries(req.query).reduce(
     (acc, [key, value]) =>
       key === "url" ? (value as string) : `${acc}&${key}=${value}`,
@@ -14,7 +17,7 @@ export default function audioProxy(req: NextApiRequest, res: NextApiResponse) {
   }
   const reqHeaders = req.headers;
 
-  fetch(url, {
+  return await fetch(url, {
     headers: Object.fromEntries(
       Object.entries(reqHeaders).filter(([key]) => key !== "host")
     ) as HeadersInit,

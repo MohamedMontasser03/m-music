@@ -42,3 +42,9 @@ export default async function audioProxy(
       res.status(500).send("Internal Server Error");
     });
 }
+
+export const config = {
+  api: {
+    responseLimit: "10mb",
+  },
+};

@@ -4,12 +4,12 @@ import {
   Dialog,
   Group,
   ScrollArea,
-  Stack,
   Text,
 } from "@mantine/core";
+import { RefObject, useEffect, useRef, useState } from "react";
+import { ReactSortable } from "react-sortablejs";
 import {
   ArrowsShuffle,
-  Cross,
   Repeat,
   RepeatOff,
   RepeatOnce,
@@ -17,7 +17,7 @@ import {
 } from "tabler-icons-react";
 import shallow from "zustand/shallow";
 import { TrackType, usePlayerStore } from "../../app/track-player/playerSlice";
-import { Image } from "../image/Image";
+import { Image as ImageCP } from "../image/Image";
 
 type Props = {
   opened: boolean;
@@ -32,10 +32,18 @@ export const PlaylistView: React.FC<Props> = ({
   currentTrack: idx,
   onClose,
 }) => {
-  const [{ play, toggleLoop }, { loop }] = usePlayerStore(
+  const [{ play, toggleLoop, reorderQueue }, { loop }] = usePlayerStore(
     (state) => [state.actions, state.playerOptions],
     shallow
   );
+  const [reqScroll, setReqScroll] = useState(false);
+  const [isDrag, setIsDrag] = useState(false);
+
+  useEffect(() => {
+    if (opened) {
+      setReqScroll(true);
+    }
+  }, [opened]);
 
   return (
     <Dialog
@@ -72,22 +80,58 @@ export const PlaylistView: React.FC<Props> = ({
           height: 300,
         }}
       >
-        <Stack>
+        <ReactSortable
+          list={queue}
+          animation={200}
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 10,
+          }}
+          setList={() => {}}
+          onEnd={({ newIndex, oldIndex }) => {
+            setIsDrag(false);
+            if (!oldIndex || !newIndex || newIndex === oldIndex) return;
+            reorderQueue(oldIndex, newIndex);
+          }}
+          setData={(dataTransfer) => {
+            dataTransfer.setDragImage(new Image(), 0, 0);
+          }}
+          onStart={() => {
+            setIsDrag(true);
+          }}
+        >
           {queue.map((track, i) => (
             <Button
-              key={track.title}
+              key={track.id}
               onClick={() => play(i)}
-              variant={idx !== i ? "subtle" : "light"}
+              variant={queue[idx]?.id !== track.id ? "subtle" : "light"}
               styles={{
                 inner: {
                   justifyContent: "flex-start",
                 },
+                root: {
+                  ":hover": isDrag
+                    ? {
+                        backgroundColor: "transparent",
+                      }
+                    : {},
+                },
               }}
               p={4}
               size="lg"
+              ref={(el: HTMLButtonElement | null) => {
+                if (queue[idx]?.id !== track.id) return;
+                reqScroll &&
+                  el?.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center",
+                  });
+                setReqScroll(false);
+              }}
             >
               <Group noWrap>
-                <Image
+                <ImageCP
                   src={track.thumbnails[0]!.url}
                   width={40}
                   height={40}
@@ -108,7 +152,7 @@ export const PlaylistView: React.FC<Props> = ({
               </Group>
             </Button>
           ))}
-        </Stack>
+        </ReactSortable>
       </ScrollArea>
     </Dialog>
   );

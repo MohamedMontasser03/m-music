@@ -321,7 +321,7 @@ export const usePlayerStore = create<stateType>()(
             if (!audioController) return;
             if (queue.some((t) => t.id === track.id)) return;
             set({ queue: [...queue, track] });
-            play(queue.length - 1);
+            play(queue.length); // since we haven't updated the queue yet, we need to use the old length
           },
           reorderQueue(from: number, to: number) {
             const { queue } = get();

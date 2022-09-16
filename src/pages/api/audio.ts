@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { Response } from "node-fetch";
 
 export default function audioProxy(req: NextApiRequest, res: NextApiResponse) {
+  console.log("ip of machine", req.socket.remoteAddress);
   const url = Object.entries(req.query).reduce(
     (acc, [key, value]) =>
       key === "url" ? (value as string) : `${acc}&${key}=${value}`,

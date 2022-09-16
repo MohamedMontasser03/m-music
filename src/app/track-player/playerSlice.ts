@@ -38,6 +38,7 @@ type stateType = {
   playerOptions: {
     loop: "none" | "one" | "all";
     shuffle: boolean;
+    muted: boolean;
   };
   actions: {
     pause: () => void;
@@ -54,6 +55,7 @@ type stateType = {
     toggleLoop: () => void;
     queNext: (track: TrackType) => void;
     removeTrack: (idx: number) => void;
+    toggleMute: () => void;
   };
 };
 
@@ -75,6 +77,7 @@ export const usePlayerStore = create<stateType>()(
         playerOptions: {
           loop: "none",
           shuffle: false,
+          muted: false,
         },
         actions: {
           syncLoadingState() {
@@ -401,6 +404,14 @@ export const usePlayerStore = create<stateType>()(
                 currentTrack > idx ? currentTrack - 1 : currentTrack,
             }));
           },
+          toggleMute() {
+            const { playerOptions } = get();
+            if (!audioController) return;
+            audioController.setMuted(!playerOptions.muted);
+            set({
+              playerOptions: { ...playerOptions, muted: !playerOptions.muted },
+            });
+          },
         },
       } as stateType),
     {
@@ -423,6 +434,7 @@ export const usePlayerStore = create<stateType>()(
           audioController.setCurrentTime(state.progress);
         }
         audioController.setVolume(state.volume);
+        audioController.setMuted(state.playerOptions.muted);
       },
     }
   )

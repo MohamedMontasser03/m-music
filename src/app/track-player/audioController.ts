@@ -1,19 +1,20 @@
 import { usePlayerStore } from "./playerSlice";
 
-type AudioController = {
-  readonly setSrc: (src: string) => string;
-  readonly getSrc: () => string;
-  readonly pause: () => void;
-  readonly play: () => Promise<void>;
-  readonly getIsPlaying: () => boolean;
-  readonly getDuration: () => number;
-  readonly getCurrentTime: () => number;
-  readonly setCurrentTime: (time: number) => number;
-  readonly setVolume: (volume: number) => number;
-  readonly getIsLoading: () => boolean;
-  readonly getErrors: () => MediaError[];
-  readonly clearErrors: () => void;
-};
+type AudioController = Readonly<{
+  setSrc: (src: string) => string;
+  getSrc: () => string;
+  pause: () => void;
+  play: () => Promise<void>;
+  getIsPlaying: () => boolean;
+  getDuration: () => number;
+  getCurrentTime: () => number;
+  setCurrentTime: (time: number) => number;
+  setVolume: (volume: number) => number;
+  getIsLoading: () => boolean;
+  getErrors: () => MediaError[];
+  clearErrors: () => void;
+  setMuted: (muted: boolean) => boolean;
+}>;
 
 export const audioController: AudioController | undefined = (() => {
   if (typeof window === "undefined") return undefined;
@@ -72,5 +73,6 @@ export const audioController: AudioController | undefined = (() => {
     getIsLoading: () => el.readyState <= el.HAVE_CURRENT_DATA,
     getErrors: () => errArray,
     clearErrors: () => (errArray = []),
+    setMuted: (mute: boolean) => (el.muted = mute),
   } as AudioController;
 })();

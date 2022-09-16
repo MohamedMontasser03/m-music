@@ -21,11 +21,11 @@ export const PlayerControls: React.FC = () => {
   const [
     loadingState,
     volume,
-    { pause, play, playNext, playPrev, setVolume },
+    { pause, play, playNext, playPrev, setVolume, toggleMute },
     queue,
     idx,
     isPlaying,
-    { loop },
+    { loop, muted },
   ] = usePlayerStore(
     (state) => [
       state.loadingState,
@@ -54,8 +54,14 @@ export const PlayerControls: React.FC = () => {
           }}
           spacing={0}
         >
-          <ActionIcon>
-            {volume > 0.5 ? <Volume /> : volume > 0 ? <Volume2 /> : <Volume3 />}
+          <ActionIcon onClick={() => toggleMute()}>
+            {muted || volume === 0 ? (
+              <Volume3 />
+            ) : volume > 0.5 ? (
+              <Volume />
+            ) : (
+              <Volume2 />
+            )}
           </ActionIcon>
           <Slider
             sx={{

@@ -168,18 +168,18 @@ function formatMusicList(musicList: any) {
         ?.musicItemThumbnailOverlayRenderer?.content?.musicPlayButtonRenderer
         ?.playNavigationEndpoint?.watchPlaylistEndpoint?.playlistId ??
       track.musicResponsiveListItemRenderer.navigationEndpoint?.browseEndpoint
-        .browseId;
+        ?.browseId;
     return musicList.map((track: any) => ({
-      type: id(track).length >= 24 ? "playlist" : "track",
+      type: (id(track)?.length || 0) >= 24 ? "playlist" : "track",
       title:
-        track.musicResponsiveListItemRenderer.flexColumns[0]
-          .musicResponsiveListItemFlexColumnRenderer.text.runs[0].text,
+        track.musicResponsiveListItemRenderer.flexColumns?.[0]
+          .musicResponsiveListItemFlexColumnRenderer.text.runs?.[0].text,
       id: id(track),
       authorName: author(track)?.text,
       authorId:
         author(track)?.navigationEndpoint?.browseEndpoint?.browseId ??
         track.musicResponsiveListItemRenderer.navigationEndpoint?.browseEndpoint
-          .browseId,
+          ?.browseId,
       thumbnails:
         track.musicResponsiveListItemRenderer.thumbnail.musicThumbnailRenderer
           .thumbnail.thumbnails,

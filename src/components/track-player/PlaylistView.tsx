@@ -201,6 +201,7 @@ const PlaylistItem: React.FC<{
           padding: 0,
           zIndex: 1000,
         }}
+        onClick={() => toggleMenu(false)}
       >
         <Stack
           sx={(theme) => ({

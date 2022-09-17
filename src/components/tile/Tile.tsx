@@ -21,7 +21,7 @@ import { TrackType, usePlayerStore } from "../../app/track-player/playerSlice";
 import { PlayerPlay } from "tabler-icons-react";
 import { Image } from "../image/Image";
 import Router from "next/router";
-import { useMenuState, ControlledMenu, MenuItem } from "@szhsin/react-menu";
+import { useMenuState, ControlledMenu } from "@szhsin/react-menu";
 
 type Props = {
   type: "playlist" | "track";
@@ -138,7 +138,10 @@ export const Tile: React.FC<Props> = ({
       <ControlledMenu
         {...menuProps}
         anchorPoint={anchorPoint}
-        onClose={() => toggleMenu(false)}
+        onClose={(...args) => {
+          console.log(args);
+          toggleMenu(false);
+        }}
         menuStyle={{
           padding: 0,
           zIndex: 1000,

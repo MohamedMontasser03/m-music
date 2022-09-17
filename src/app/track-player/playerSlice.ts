@@ -56,6 +56,7 @@ type stateType = {
     queNext: (track: TrackType) => void;
     removeTrack: (idx: number) => void;
     toggleMute: () => void;
+    toggleShuffle: () => void;
   };
 };
 
@@ -259,7 +260,7 @@ export const usePlayerStore = create<stateType>()(
             const {
               currentTrack,
               queue,
-              playerOptions: { loop },
+              playerOptions: { loop, shuffle },
               actions: { pause, play },
             } = get();
             if (!audioController) return;
@@ -276,6 +277,11 @@ export const usePlayerStore = create<stateType>()(
               play(currentTrack);
               return;
             }
+            if (shuffle) {
+              const newIdx = Math.floor(Math.random() * queue.length);
+              play(newIdx);
+              return;
+            }
             play(
               loop === "none"
                 ? currentTrack + 1
@@ -288,7 +294,7 @@ export const usePlayerStore = create<stateType>()(
               actions: { play },
               progress,
               loadingState,
-              playerOptions: { loop },
+              playerOptions: { loop, shuffle },
               queue,
             } = get();
             if (!audioController) return;
@@ -303,7 +309,9 @@ export const usePlayerStore = create<stateType>()(
               play();
               return;
             }
-
+            if (shuffle) {
+              return play(Math.floor(Math.random() * queue.length));
+            }
             const prevTrack =
               loop === "none"
                 ? currentTrack - 1
@@ -410,6 +418,17 @@ export const usePlayerStore = create<stateType>()(
             audioController.setMuted(!playerOptions.muted);
             set({
               playerOptions: { ...playerOptions, muted: !playerOptions.muted },
+            });
+          },
+          toggleShuffle() {
+            const {
+              playerOptions: { shuffle, ...rest },
+            } = get();
+            set({
+              playerOptions: {
+                ...rest,
+                shuffle: !shuffle,
+              },
             });
           },
         },

@@ -35,7 +35,7 @@ export const PlaylistView: React.FC<Props> = ({
   currentTrack: idx,
   onClose,
 }) => {
-  const [{ play, toggleLoop, reorderQueue, removeTrack }, { loop }] =
+  const [{ toggleLoop, reorderQueue, toggleShuffle }, { loop, shuffle }] =
     usePlayerStore((state) => [state.actions, state.playerOptions], shallow);
   const [reqScroll, setReqScroll] = useState(false);
   const [isDrag, setIsDrag] = useState(false);
@@ -59,8 +59,8 @@ export const PlaylistView: React.FC<Props> = ({
     >
       <Group mb="md" position="apart">
         <Group>
-          <ActionIcon>
-            <ArrowsShuffle />
+          <ActionIcon onClick={() => toggleShuffle()}>
+            <ArrowsShuffle opacity={shuffle ? 1 : 0.5} />
           </ActionIcon>
           <ActionIcon onClick={() => toggleLoop()}>
             {loop === "none" ? (

@@ -16,7 +16,7 @@ export const TileList: React.FC<Props> = ({ section }) => {
         slideSize="25%"
         loop
         slideGap="md"
-        onMouseDown={() => {
+        onMouseUp={() => {
           // re run the default behavior of the mouseDown event
           window.getSelection()?.removeAllRanges();
           if (document.activeElement instanceof HTMLElement)

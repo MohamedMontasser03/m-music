@@ -184,6 +184,17 @@ export const usePlayerStore = create<stateType>()(
               });
             }
 
+            if (!isFetchingUrl(get().loadingState) && !get().playingData.id) {
+              set({
+                loadingState: "initialUrl",
+                playingData: {
+                  id: queue[newIdx ?? currentTrack]!.id,
+                  fetchingUrl: false,
+                  url: queue[newIdx ?? currentTrack]!.url ?? "",
+                },
+              });
+            }
+
             if (
               isFetchingUrl(get().loadingState) &&
               !get().playingData.fetchingUrl
@@ -451,6 +462,13 @@ export const usePlayerStore = create<stateType>()(
         if (state.playingData.url !== "") {
           audioController.setSrc(state.playingData.url);
           audioController.setCurrentTime(state.progress);
+        }
+        if (state.playingData.fetchingUrl) {
+          state.playingData.fetchingUrl = false;
+          state.playingData.url = "";
+          state.playingData.id = "";
+          state.loadingState = "done";
+          console.log("resetting fetching url", state);
         }
         audioController.setVolume(state.volume);
         audioController.setMuted(state.playerOptions.muted);

@@ -42,7 +42,9 @@ export const TrackPlayer: React.FC = () => {
             justify="center"
             align="flex-start"
           >
-            <Text lineClamp={1}>{queue[idx]?.title}</Text>
+            <Text lineClamp={1} title={queue[idx]?.title}>
+              {queue[idx]?.title}
+            </Text>
             <ProgressControls />
             <PlayerControls />
           </Stack>

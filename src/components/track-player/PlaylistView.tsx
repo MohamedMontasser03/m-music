@@ -187,6 +187,7 @@ const PlaylistItem: React.FC<{
               lineHeight: "20px",
             }}
             lineClamp={2}
+            title={track.title}
           >
             {track.title}
           </Text>

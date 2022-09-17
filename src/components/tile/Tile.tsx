@@ -242,8 +242,10 @@ const CardTile: React.FC<CardProps> = ({
         </ActionIcon>
       </Card.Section>
       <Stack spacing="xs" py="lg">
-        <Text lineClamp={2}>{title}</Text>
-        <Text color="dimmed" lineClamp={3}>
+        <Text lineClamp={2} title={title}>
+          {title}
+        </Text>
+        <Text color="dimmed" lineClamp={3} title={authorName}>
           {authorName}
         </Text>
       </Stack>
@@ -277,8 +279,10 @@ const CardRow: React.FC<CardProps> = ({
           fallback="https://www.gstatic.com/youtube/media/ytm/images/pbg/attribute-radio-fallback-2@1000.png"
         />
         <Stack spacing="xs" py="lg">
-          <Text lineClamp={1}>{title}</Text>
-          <Text color="dimmed" lineClamp={1}>
+          <Text lineClamp={1} title={title}>
+            {title}
+          </Text>
+          <Text color="dimmed" lineClamp={1} title={authorName}>
             {authorName}
           </Text>
         </Stack>

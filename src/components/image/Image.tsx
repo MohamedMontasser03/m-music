@@ -1,5 +1,5 @@
 import { Center, Image as MImage, ImageProps, Loader } from "@mantine/core";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 type Props = {
   src: string;
@@ -18,8 +18,12 @@ export const Image: React.FC<Props> = ({
   fallback,
   ...props
 }) => {
-  const imageRef = useRef<HTMLImageElement>(null);
+  const imageRef = useRef<HTMLImageElement | null>(null);
   const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    setLoaded(false);
+  }, [src]);
 
   const onLoad = (): void => {
     setLoaded(true);
@@ -42,8 +46,10 @@ export const Image: React.FC<Props> = ({
         onLoad={onLoad}
         onError={onError}
         imageRef={(el) => {
+          if (!el) return;
+          el?.complete && !el?.naturalHeight && fallback && (el.src = fallback);
           el?.naturalHeight && setLoaded(true);
-          return imageRef;
+          imageRef.current = el;
         }}
         sx={!loaded ? { position: "absolute", opacity: 0 } : {}}
       />

@@ -28,8 +28,8 @@ const Track: NextPage = () => {
     <MainLayout title={result?.title ?? "..."}>
       {!isLoading && result ? (
         <Stack>
-          <Group p="lg" align="end" position="apart">
-            <Group>
+          <Group p="lg" align="end" noWrap position="apart">
+            <Group noWrap>
               <Image
                 src={result.thumbnails[0]?.url!}
                 width={200}
@@ -37,7 +37,14 @@ const Track: NextPage = () => {
                 alt={result?.title}
               />
               <Stack>
-                <Text size="xl" weight={700}>
+                <Text
+                  size="xl"
+                  weight={700}
+                  sx={{
+                    wordBreak: "break-all",
+                    wordWrap: "break-word",
+                  }}
+                >
                   {result?.title}
                 </Text>
                 <Text>

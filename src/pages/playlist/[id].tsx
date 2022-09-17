@@ -24,8 +24,8 @@ const Playlist: NextPage = () => {
     <MainLayout title={result?.title ?? "..."}>
       {!isLoading && result ? (
         <Stack>
-          <Group p="lg" align="end" position="apart">
-            <Group>
+          <Group p="lg" align="end" position="apart" noWrap>
+            <Group noWrap>
               <Image
                 src={result.bestThumbnail.url!}
                 width={200}
@@ -33,7 +33,14 @@ const Playlist: NextPage = () => {
                 alt={result?.title}
               />
               <Stack>
-                <Text size="xl" weight={700}>
+                <Text
+                  size="xl"
+                  weight={700}
+                  sx={{
+                    wordBreak: "break-all",
+                    wordWrap: "break-word",
+                  }}
+                >
                   {result?.title}
                 </Text>
                 {result?.author ? (

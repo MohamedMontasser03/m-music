@@ -270,7 +270,7 @@ const CardRow: React.FC<CardProps> = ({
       position="apart"
       onContextMenu={onContextMenu}
     >
-      <Group>
+      <Group noWrap>
         <Image
           src={thumbnailUrl}
           height={80}

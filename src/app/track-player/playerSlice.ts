@@ -468,7 +468,6 @@ export const usePlayerStore = create<stateType>()(
           state.playingData.url = "";
           state.playingData.id = "";
           state.loadingState = "done";
-          console.log("resetting fetching url", state);
         }
         audioController.setVolume(state.volume);
         audioController.setMuted(state.playerOptions.muted);

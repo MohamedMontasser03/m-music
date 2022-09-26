@@ -3,6 +3,7 @@ import { z } from "zod";
 import ytdl from "ytdl-core";
 import ytpl from "ytpl";
 import type { TrackType } from "../../app/track-player/playerSlice";
+import { getArtistResult } from "../services/details";
 
 export const detailsRouter = createRouter()
   .query(".video", {
@@ -85,5 +86,13 @@ export const detailsRouter = createRouter()
           duration: item.durationSec || 0,
         })),
       };
+    },
+  })
+  .query(".artist", {
+    input: z.object({
+      id: z.string(),
+    }),
+    async resolve({ input }) {
+      return getArtistResult(input.id);
     },
   });

@@ -138,10 +138,7 @@ export const Tile: React.FC<Props> = ({
       <ControlledMenu
         {...menuProps}
         anchorPoint={anchorPoint}
-        onClose={(...args) => {
-          console.log(args);
-          toggleMenu(false);
-        }}
+        onClose={() => toggleMenu(false)}
         menuStyle={{
           padding: 0,
           zIndex: 1000,

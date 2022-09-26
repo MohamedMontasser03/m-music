@@ -90,10 +90,15 @@ export const PlaylistView: React.FC<Props> = ({
             gap: 10,
           }}
           setList={() => {}}
-          onEnd={({ newIndex, oldIndex }) => {
+          onEnd={({ newIndex, oldIndex, ...rest }) => {
             setIsDrag(false);
-            if (!oldIndex || !newIndex || newIndex === oldIndex) return;
-            reorderQueue(oldIndex, newIndex);
+            if (
+              [oldIndex, newIndex].some((val) => val === undefined) ||
+              newIndex === oldIndex
+            )
+              return;
+            console.log(newIndex, oldIndex, rest);
+            reorderQueue(oldIndex! / 2, newIndex! / 2);
           }}
           setData={(dataTransfer) => {
             dataTransfer.setDragImage(new Image(), 0, 0);

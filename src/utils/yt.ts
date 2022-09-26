@@ -52,6 +52,47 @@ export const commonYTBody = {
       userAgent:
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:88.0) Gecko/20100101 Firefox/88.0",
     },
+    // "client": {
+    //   "hl": "en-GB",
+    //   "gl": "EG",
+    //   "remoteHost": "41.37.122.236",
+    //   "deviceMake": "",
+    //   "deviceModel": "",
+    //   "visitorData": "Cgt4bzlyWG83cjJCdyjM_8CZBg%3D%3D",
+    //   "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36,gzip(gfe)",
+    //   "clientName": "WEB_REMIX",
+    //   "clientVersion": "1.20220919.01.00",
+    //   "osName": "Windows",
+    //   "osVersion": "10.0",
+    //   "originalUrl": "https://music.youtube.com/",
+    //   "platform": "DESKTOP",
+    //   "clientFormFactor": "UNKNOWN_FORM_FACTOR",
+    //   "configInfo": {
+    //     "appInstallData": "CMz_wJkGEM2F_hIQuIuuBRC3yK4FEP24_RIQ4rmuBRDbyq4FELfLrQUQ1IOuBRDgza4FEL7ErgUQmcauBRDqyq4FEL3NrgUQy-z9EhDYvq0F"
+    //   },
+    //   "browserName": "Chrome",
+    //   "browserVersion": "105.0.0.0",
+    //   "screenWidthPoints": 1009,
+    //   "screenHeightPoints": 649,
+    //   "screenPixelDensity": 1,
+    //   "screenDensityFloat": 1,
+    //   "utcOffsetMinutes": 120,
+    //   "userInterfaceTheme": "USER_INTERFACE_THEME_DARK",
+    //   "timeZone": "Africa/Cairo",
+    //   "musicAppInfo": {
+    //     "pwaInstallabilityStatus": "PWA_INSTALLABILITY_STATUS_UNKNOWN",
+    //     "webDisplayMode": "WEB_DISPLAY_MODE_BROWSER",
+    //     "storeDigitalGoodsApiSupportStatus": {
+    //       "playStoreDigitalGoodsApiSupportStatus": "DIGITAL_GOODS_API_SUPPORT_STATUS_UNSUPPORTED"
+    //     },
+    //     "musicActivityMasterSwitch": "MUSIC_ACTIVITY_MASTER_SWITCH_INDETERMINATE",
+    //     "musicLocationMasterSwitch": "MUSIC_LOCATION_MASTER_SWITCH_INDETERMINATE"
+    //   }
+    // },
+    user: {
+      enableSafetyMode: true,
+      lockedSafetyMode: false,
+    },
   },
 } as const;
 
@@ -130,6 +171,39 @@ export function formatRecommendationResults<
     trackingParam,
   };
 }
+
+// export function formatArtistResults<T extends "home" | "explore" = "home">(
+//   rec: any // Youtube's Api response is so big that it's not worth creating a type for it
+// ): {
+//   sections: RecommendationReturnType<T>["sections"];
+//   artist: {
+//     name: string;
+//     url: string;
+//     description?: string;
+//   };
+// } {
+//   const base =
+//     rec.contents?.singleColumnBrowseResultsRenderer?.tabs?.[0]?.tabRenderer
+//       ?.content?.sectionListRenderer ||
+//     rec?.continuationContents?.sectionListContinuation;
+//   return {
+//     sections: base.contents
+//       .filter(
+//         (section: any) =>
+//           section.musicCarouselShelfRenderer || section.gridRenderer
+//       )
+//       .map((section: any) => ({
+//         title:
+//           section.musicCarouselShelfRenderer?.header
+//             ?.musicCarouselShelfBasicHeaderRenderer?.title?.runs[0].text ??
+//           section.gridRenderer?.header?.gridHeaderRenderer?.title?.runs[0].text,
+//         items: formatMusicList(
+//           section.musicCarouselShelfRenderer?.contents ??
+//             section.gridRenderer?.items
+//         ),
+//       })),
+//   };
+// }
 
 export function formatSearchResults(
   rec: any // Youtube's Api response is so big that it's not worth creating a type for it

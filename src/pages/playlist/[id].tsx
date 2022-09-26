@@ -15,10 +15,10 @@ const Playlist: NextPage = () => {
     "details.playlist.full",
     { id: query.id as string },
   ]);
-
   if (!result && !isLoading && typeof window !== "undefined") {
     push("/404");
   }
+  console.log(result);
 
   return (
     <MainLayout title={result?.title ?? "..."}>
